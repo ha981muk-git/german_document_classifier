@@ -1,0 +1,35 @@
+name: doc-classifier-env
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  # Core ML + Deep Learning
+  - pytorch=2.3
+  - torchvision
+  - torchaudio
+  - transformers=4.45.0
+  - datasets=3.0.0
+  - scikit-learn=1.5.0
+  - pandas
+  - numpy
+  - matplotlib
+  - pyyaml
+
+  # Workflow + Pipelines
+  - metaflow
+  - jupyter
+  - ipykernel
+
+  # API & Serving
+  - fastapi
+  - uvicorn
+
+  # Extra tools (logging, progress, metrics)
+  - pip:
+      - sentencepiece==0.2.0
+      - evaluate==0.4.2
+      - tqdm==4.66.5
+      - wandb==0.18.5
+

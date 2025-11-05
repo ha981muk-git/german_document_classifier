@@ -4,7 +4,7 @@ import os
 import random
 
 fake = Faker(['de_DE', 'de_AT', 'de_CH'])  # adds regional diversity
-os.makedirs("../data/data_synthetic", exist_ok=True)
+os.makedirs("data/data_synthetic", exist_ok=True)
 
 def random_date():
     return fake.date_between(start_date='-2y', end_date='today').strftime('%d.%m.%Y')
@@ -246,7 +246,7 @@ generators = {
 # generate 100 per category
 for category, func in generators.items():
     for i in range(100):
-        with open(f"data_raw/{category}_{i+1}.txt", "w", encoding="utf-8") as f:
+        with open(f"data/data_synthetic/{category}_{i+1}.txt", "w", encoding="utf-8") as f:
             f.write(func())
 
-print("✅ Generated 500+ diverse German business documents in data_raw/")
+print("✅ Generated 500+ diverse German business documents in data/data_synthetic/")

@@ -245,7 +245,7 @@ generators = {
 
 # generate 100 per category
 for category, func in generators.items():
-    for i in range(100):
+    for i in range(1000):
         with open(f"data/data_synthetic/{category}_{i+1}.txt", "w", encoding="utf-8") as f:
             f.write(func())
 

@@ -42,6 +42,10 @@ class GermanDocumentGenerator:
             "Martin Becker", "Julia Hoffmann", "Klaus Schulz", "Lisa Koch",
             "Peter Bauer", "Maria Richter", "Stefan Wagner", "Laura Klein"
         ]
+    def random_date(self):
+        """Generate a random date within the last 2 years"""
+        days_ago = random.randint(1, 730)  # 730 days = ~2 years
+        return (datetime.now() - timedelta(days=days_ago)).strftime('%d.%m.%Y')
     
     def generate_invoices(self, n=100):
         """Generate 15 different invoice template variations"""
@@ -1320,17 +1324,19 @@ Auftraggeber                         Schulungsanbieter
             self._po_template_bulk,
             self._po_template_urgent,
             self._po_template_international,
-            self._po_template_services,
-            self._po_template_recurring,
-            self._po_template_construction,
-            self._po_template_it_equipment,
-            self._po_template_office_supplies,
-            self._po_template_raw_materials,
-            self._po_template_consulting_services,
-            self._po_template_maintenance_parts,
-            self._po_template_marketing_materials,
-            self._po_template_software_licenses,
-            self._po_template_logistics
+            self._po_template_services            
+            # self._po_template_recurring,
+            # self._po_template_construction,
+            # self._po_template_it_equipment,
+            # self._po_template_office_supplies,
+            # self._po_template_raw_materials,
+            # self._po_template_consulting_services,
+            # self._po_template_maintenance_parts,
+            # self._po_template_marketing_materials,
+            # self._po_template_software_licenses,
+            # self._po_template_logisticsplate_logistics
+
+
         ]
         
         for i in range(n):
@@ -1508,17 +1514,17 @@ Zahlungsbedingungen: Netto 30 Tage nach Rechnungserhalt
             self._reminder_template_first,
             self._reminder_template_second,
             self._reminder_template_final,
-            self._reminder_template_legal,
-            self._reminder_template_phone,
-            self._reminder_template_email_style,
-            self._reminder_template_payment_plan,
-            self._reminder_template_partial_payment,
-            self._reminder_template_service_reminder,
-            self._reminder_template_subscription,
-            self._reminder_template_urgent,
-            self._reminder_template_last_chance,
-            self._reminder_template_collection,
-            self._reminder_template_pre_legal
+            self._reminder_template_legal
+            # self._reminder_template_phone,
+            # self._reminder_template_email_style,
+            # self._reminder_template_payment_plan,
+            # self._reminder_template_partial_payment,
+            # self._reminder_template_service_reminder,
+            # self._reminder_template_subscription,
+            # self._reminder_template_urgent,
+            # self._reminder_template_last_chance,
+            # self._reminder_template_collection,
+            # self._reminder_template_pre_legal
         ]
         
         for i in range(n):
@@ -1657,20 +1663,20 @@ Rechtsanwaltskanzlei Müller & Partner
         
         templates = [
             self._complaint_template_delivery,
-            self._complaint_template_quality,
-            self._complaint_template_wrong_item,
-            self._complaint_template_damaged,
-            self._complaint_template_service,
-            self._complaint_template_delay,
-            self._complaint_template_invoice,
-            self._complaint_template_warranty,
-            self._complaint_template_urgent,
-            self._complaint_template_formal,
-            self._complaint_template_simple,
-            self._complaint_template_technical,
-            self._complaint_template_quantity,
-            self._complaint_template_packaging,
-            self._complaint_template_follow_up
+            self._complaint_template_quality
+            # self._complaint_template_wrong_item,
+            # self._complaint_template_damaged,
+            # self._complaint_template_service,
+            # self._complaint_template_delay,
+            # self._complaint_template_invoice,
+            # self._complaint_template_warranty,
+            # self._complaint_template_urgent,
+            # self._complaint_template_formal,
+            # self._complaint_template_simple,
+            # self._complaint_template_technical,
+            # self._complaint_template_quantity,
+            # self._complaint_template_packaging,
+            # self._complaint_template_follow_up
         ]
         
         for i in range(n):
@@ -1784,126 +1790,138 @@ Hochachtungsvoll
             'main_csv': csv_path,
             'label_csvs': [f"{label.lower()}_documents.csv" for label in df['label'].unique()]
         }
+    def save_as_text_files(self, documents_list, output_dir, category_name):
+        """
+        Save each document as a separate .txt file
+        
+        Args:
+            documents_list: List of dicts with 'text' and 'label' keys
+            output_dir: Directory to save files
+            category_name: Category name for filename prefix (e.g., 'invoice', 'contract')
+        """
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        files_written = 0
+        for i, doc in enumerate(documents_list, start=1):
+            filename = output_dir / f"{category_name}_{i}.txt"
+            
+            # Write the text content to file
+            text_content = doc['text'] if isinstance(doc, dict) else str(doc)
+            filename.write_text(text_content, encoding='utf-8')
+            files_written += 1
+        
+        return files_written
 
-# Update the main execution function
-def generate_synthetic_data(balanced=True, samples_per_class=150):
-    """Generate complete synthetic dataset with balancing options"""
+def save_all_synthetic_as_text_files(per_category=200, output_dir="data/data_synthetic", overwrite=False):
+    """
+    Generate all document types and save each one as a separate .txt file
+    
+    Args:
+        per_category: Number of documents to generate per category
+        output_dir: Directory to save all .txt files
+        overwrite: Whether to overwrite existing files
+    
+    Returns:
+        Dictionary with statistics about generated files
+    """
     generator = GermanDocumentGenerator()
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
     
-    print("Generating invoices...")
-    invoices = generator.generate_invoices(samples_per_class)
+    stats = {}
+    total_files = 0
     
-    print("Generating contracts...")
-    contracts = generator.generate_contracts(samples_per_class)
+    # Document types to generate
+    document_types = {
+        'invoice': generator.generate_invoices,
+        'contract': generator.generate_contracts,
+        'order': generator.generate_purchase_orders,
+        'reminder': generator.generate_reminders,
+        'complaint': generator.generate_complaints
+    }
     
-    print("Generating purchase orders...")
-    orders = generator.generate_purchase_orders(samples_per_class)
+    print(f"Generating {per_category} documents per category...")
+    print(f"Output directory: {output_path.absolute()}\n")
     
-    print("Generating reminders...")
-    reminders = generator.generate_reminders(samples_per_class)
+    for category, generate_func in document_types.items():
+        print(f"📝 Generating {category} documents...")
+        
+        # Generate documents for this category
+        documents = generate_func(per_category)
+        
+        # Save each document as a separate .txt file
+        files_written = 0
+        for i, doc in enumerate(documents, start=1):
+            filename = output_path / f"{category}_{i}.txt"
+            
+            # Skip if file exists and overwrite is False
+            if filename.exists() and not overwrite:
+                continue
+            
+            # Extract text content
+            text_content = doc['text'] if isinstance(doc, dict) else str(doc)
+            
+            # Write to file
+            filename.write_text(text_content, encoding='utf-8')
+            files_written += 1
+        
+        stats[category] = files_written
+        total_files += files_written
+        print(f"   ✅ Saved {files_written} {category} files")
     
-    print("Generating complaints...")
-    complaints = generator.generate_complaints(samples_per_class)
+    print(f"\n{'='*60}")
+    print(f"✅ Total files generated: {total_files}")
+    print(f"📁 Location: {output_path.absolute()}")
+    print(f"{'='*60}\n")
     
-    # Combine all documents
-    all_documents = invoices + contracts + orders + reminders + complaints
+    # Print file breakdown
+    print("File breakdown by category:")
+    for category, count in stats.items():
+        print(f"  - {category:12s}: {count:4d} files")
     
-    # Create DataFrame
-    df = pd.DataFrame(all_documents)
-    
-    # Balance dataset if requested
-    if balanced:
-        print("Balancing dataset...")
-        df = generator.balance_dataset(df, samples_per_class)
-    
-    # Shuffle the dataset
-    df = df.sample(frac=1, random_state=42).reset_index(drop=True)
-    
-    # Create output directory with timestamp
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = Path(f"synthetic_german_documents_{timestamp}")
-    
-    # Save as CSV only
-    print("Saving dataset as CSV...")
-    saved_files = generator.save_dataset_csv(df, output_dir)
-    
-    # Print statistics
-    print(f"\n✅ Generated {len(df)} documents total:")
-    label_counts = df['label'].value_counts()
-    for label, count in label_counts.items():
-        print(f"- {label}: {count} documents")
-    
-    print(f"\n📁 CSV files saved to: {output_dir}/")
-    print(f"- Main file: {saved_files['main_csv']}")
-    print("- Individual files per document type:")
-    for csv_file in saved_files['label_csvs']:
-        print(f"  * {csv_file}")
-    
-    return df, saved_files
+    return {
+        'total_files': total_files,
+        'output_dir': str(output_path.absolute()),
+        'stats': stats
+    }
 
-# Enhanced utility functions with balancing options
-def make_invoice(n=100, balanced=True):
-    """Generate invoice documents"""
-    invoices = GermanDocumentGenerator().generate_invoices(n)
-    df = pd.DataFrame(invoices)
-    if balanced and len(df) > 0:
-        df = GermanDocumentGenerator().balance_dataset(df, n)
-    return df
 
-def make_contract(n=100, balanced=True):
-    """Generate contract documents"""
-    contracts = GermanDocumentGenerator().generate_contracts(n)
-    df = pd.DataFrame(contracts)
-    if balanced and len(df) > 0:
-        df = GermanDocumentGenerator().balance_dataset(df, n)
-    return df
+def save_synthetic_texts(per_category=200, out_dir="data/data_synthetic", overwrite=False):
+    """
+    Alternative function name for compatibility
+    Generates documents using the make_* helpers and saves each document as a UTF-8 .txt file.
+    
+    Args:
+        per_category: How many documents to generate per category
+        out_dir: Directory to write files into (will be created if missing)
+        overwrite: If False, existing files will be preserved
+    
+    Returns:
+        Number of files written
+    """
+    result = save_all_synthetic_as_text_files(per_category, out_dir, overwrite)
+    return result['total_files']
 
-def make_order(n=100, balanced=True):
-    """Generate purchase order documents"""
-    orders = GermanDocumentGenerator().generate_purchase_orders(n)
-    df = pd.DataFrame(orders)
-    if balanced and len(df) > 0:
-        df = GermanDocumentGenerator().balance_dataset(df, n)
-    return df
-
-def make_reminder(n=100, balanced=True):
-    """Generate reminder documents"""
-    reminders = GermanDocumentGenerator().generate_reminders(n)
-    df = pd.DataFrame(reminders)
-    if balanced and len(df) > 0:
-        df = GermanDocumentGenerator().balance_dataset(df, n)
-    return df
-
-def make_complaint(n=100, balanced=True):
-    """Generate complaint documents"""
-    complaints = GermanDocumentGenerator().generate_complaints(n)
-    df = pd.DataFrame(complaints)
-    if balanced and len(df) > 0:
-        df = GermanDocumentGenerator().balance_dataset(df, n)
-    return df
-
-# Dictionary mapping for the function references
-document_generators = {
-    "invoice": make_invoice,
-    "contract": make_contract,
-    "order": make_order,
-    "reminder": make_reminder,
-    "complaint": make_complaint
-}
 
 if __name__ == "__main__":
-    # Generate the complete balanced dataset
-    dataset, files = generate_synthetic_data(balanced=True, samples_per_class=150)
+    # Generate and save all documents as individual .txt files
+    print("=" * 60)
+    print("GERMAN BUSINESS DOCUMENT GENERATOR")
+    print("Generating synthetic training data as .txt files")
+    print("=" * 60)
+    print()
     
-    # Example: Generate only invoices
-    # invoices_df = make_invoice(50, balanced=True)
-    # print(f"Generated {len(invoices_df)} balanced invoices")
+    # Option 1: Use the detailed function with statistics
+    result = save_all_synthetic_as_text_files(
+        per_category=200,
+        output_dir="data/data_synthetic",
+        overwrite=False
+    )
     
-    # Example: Generate unbalanced dataset
-    # dataset_unbalanced, files_unbalanced = generate_synthetic_data(balanced=False, samples_per_class=200)
-    # Generate the complete dataset
-    #dataset = generate_synthetic_data()
+    # Option 2: Or use the simpler function
+    # total = save_synthetic_texts(per_category=200, out_dir="data/data_synthetic", overwrite=False)
+    # print(f"Done — wrote {total} text files to data/data_synthetic/")
     
-    # Example: Generate only invoices
-    # invoices = make_invoice(50)
-    # print(f"Generated {len(invoices)} invoices")
+    print("\n✨ Generation complete! You can now use these files for training.")
+    print(f"   Each document is saved as a separate .txt file in: {result['output_dir']}")

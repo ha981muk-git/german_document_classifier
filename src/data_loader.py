@@ -1,55 +1,48 @@
 # data_loader.py
 import os
+import numpy as np
 import pandas as pd
-from torch.utils.data import Dataset, DataLoader
+import torch
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from datasets import Dataset, DatasetDict
 from transformers import AutoTokenizer
 
-
-script_path = os.path.realpath(__file__)
-script_dir = os.path.dirname(script_path)
-data_path = os.path.join(script_dir, '../data/data_processed/all_data.csv')
+os.environ["WANDB_DISABLED"] = "true"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
-class GermanDocumentDataset(Dataset):
-    def __init__(self, texts, labels, tokenizer, max_length=512):
-        self.texts = texts
-        self.labels = labels
-        self.tokenizer = tokenizer
-        self.max_length = max_length
-    
-    def __len__(self):
-        return len(self.texts)
-    
-    def __getitem__(self, idx):
-        text = self.texts[idx]
-        label = self.labels[idx]
-        
-        # Tokenize the text
-        encoding = self.tokenizer(
-            text,
-            max_length=self.max_length,
-            padding='max_length',
+def load_and_prepare_data(csv_path, label_classes_output="./models/label_classes.npy"):
+    df = pd.read_csv(csv_path)
+    df = df[["text", "label"]].dropna()
+
+    label_encoder = LabelEncoder()
+    df["label"] = label_encoder.fit_transform(df["label"])
+
+    np.save(label_classes_output, label_encoder.classes_)
+
+    train_df, temp_df = train_test_split(df, test_size=0.2, stratify=df["label"], random_state=42)
+    val_df, test_df = train_test_split(temp_df, test_size=0.5, stratify=temp_df["label"], random_state=42)
+
+    dataset = DatasetDict({
+        "train": Dataset.from_dict(train_df.to_dict("list")),
+        "validation": Dataset.from_dict(val_df.to_dict("list")),
+        "test": Dataset.from_dict(test_df.to_dict("list"))
+    })
+
+    return dataset, label_encoder
+
+
+def tokenize_dataset(dataset, tokenizer_name="dbmdz/bert-base-german-cased", max_length=512):
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+
+    def tokenize(example):
+        return tokenizer(
+            example["text"],
+            padding="max_length",
             truncation=True,
-            return_tensors='pt'
+            max_length=max_length,
         )
-        
-        
-        return {
-            'input_ids': encoding['input_ids'].flatten(),
-            'attention_mask': encoding['attention_mask'].flatten(),
-            'label': torch.tensor(label, dtype=torch.long)
-        }
 
-# Load your data
-df = pd.read_csv(data_path)
-tokenizer = AutoTokenizer.from_pretrained('bert-base-german-cased')
-
-# Create dataset
-dataset = GermanDocumentDataset(
-    texts=df['text'].tolist(),
-    labels=df['label'].tolist(),
-    tokenizer=tokenizer
-)
-
-# Create data loader
-train_loader = DataLoader(dataset, batch_size=16, shuffle=True)
+    dataset = dataset.map(tokenize, remove_columns=["text"])
+    return dataset, tokenizer

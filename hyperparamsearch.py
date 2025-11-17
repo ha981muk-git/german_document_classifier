@@ -1,16 +1,17 @@
 import os
 import json
+import time
 import optuna
 import pandas as pd
 from src.train import train_model
 
 CSV_PATH = "./data/data_processed/all_data.csv"
+STORAGE_URL = "sqlite:///optuna_studies.db"
 
 MODELS = [
     "deepset/gbert-base",
     "dbmdz/bert-base-german-cased",
 ]
-
 
 
 # ------------------------------
@@ -25,7 +26,6 @@ def build_objective(model_name):
         dropout = trial.suggest_float("dropout", 0.0, 0.3)
         weight_decay = trial.suggest_float("weight_decay", 0.0, 0.3)
         batch_size = trial.suggest_categorical("batch_size", [2, 4, 8])
-
 
         model_dir = f"./models/{model_name.replace('/', '_')}/hpo/trial_{trial.number}"
         os.makedirs(model_dir, exist_ok=True)
@@ -42,10 +42,10 @@ def build_objective(model_name):
             dropout=dropout
         )
 
-        # store metrics so Optuna can export later
         trial.set_user_attr("metrics", metrics)
 
-        return metrics["f1"]
+        # Return Optuna objective: the F1 score
+        return metrics["eval_f1"]
 
     return objective
 
@@ -56,54 +56,42 @@ def build_objective(model_name):
 if __name__ == "__main__":
     print("🚀 Starting MULTI-MODEL Optuna HPO...")
 
-    global_best_rows = []  # For final leaderboard CSV
+    global_best_rows = []
 
     for model_name in MODELS:
 
-        
         print(f"🔍 Running HPO for model: {model_name}")
 
-
-        # Model-specific directory
         base_dir = f"./models/{model_name.replace('/', '_')}/hpo"
         os.makedirs(base_dir, exist_ok=True)
 
-        # Study persistence DB
-        study_path = os.path.join(base_dir, "study.db")
+        study_name = f"hpo_{model_name.replace('/', '_')}_{int(time.time())}"
+
         study = optuna.create_study(
+            storage=STORAGE_URL,
+            study_name=study_name,
             direction="maximize",
-            study_name=f"hpo_{model_name.replace('/', '_')}",
-            storage=f"sqlite:///{study_path}",
-            load_if_exists=True,
-            pruner=optuna.pruners.MedianPruner(),
-            sampler=optuna.samplers.TPESampler(seed=42)  # safer and deterministic
+            load_if_exists=False
         )
 
-
         objective = build_objective(model_name)
-
-        # Run optimization
         study.optimize(objective, n_trials=10)
 
-        # -------------------------------
-        # Save best hyperparameters JSON
-        # -------------------------------
+        # Save best hyperparameters
         best_params_path = os.path.join(base_dir, "best_hyperparams.json")
         with open(best_params_path, "w") as f:
             json.dump(study.best_trial.params, f, indent=4)
 
-        # -------------------------------
-        # Save ALL trial results to CSV
-        # -------------------------------
+        # Save all trials
         rows = []
         for t in study.trials:
             m = t.user_attrs.get("metrics", {})
             rows.append({
                 "model": model_name,
                 "trial": t.number,
-                "f1": t.value,
+                "eval_f1": t.value,    # <-- FIX HERE
                 **t.params,
-                **m  # accuracy, recall, etc.
+                **m
             })
 
         df = pd.DataFrame(rows)
@@ -112,26 +100,19 @@ if __name__ == "__main__":
 
         print(f"📄 Saved CSV with all trials: {csv_path}")
 
-        # -------------------------------
-        # Save top 5 best trials JSON
-        # -------------------------------
-        trials_sorted = df.sort_values("f1", ascending=False)
-        best_5 = trials_sorted.head(5)
+        # Save best N
+        trials_sorted = df.sort_values("eval_f1", ascending=False)
+        best_n = trials_sorted.head(2)
 
         best_trials_path = os.path.join(base_dir, "best_trials.json")
-        best_5.to_json(best_trials_path, orient="records", indent=4)
+        best_n.to_json(best_trials_path, orient="records", indent=4)
 
-        print(f"🏆 Saved top 5 best trials JSON: {best_trials_path}")
+        print(f"🏆 Saved best trials JSON: {best_trials_path}")
 
-        # Add top 5 to global leaderboard
-        global_best_rows.append(best_5)
+        global_best_rows.append(best_n)
 
-    # -------------------------------
-    # Save GLOBAL leaderboard CSV
-    # -------------------------------
-    if global_best_rows:
-        leaderboard = pd.concat(global_best_rows, ignore_index=True)
-
+    # Global leaderboard
+    leaderboard = pd.concat(global_best_rows, ignore_index=True)
     leaderboard_path = "./models/hpo_leaderboard.csv"
     leaderboard.to_csv(leaderboard_path, index=False)
 

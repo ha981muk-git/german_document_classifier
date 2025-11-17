@@ -1,5 +1,5 @@
 data/data_raw
 data/data_synthetic
-models
+models*
 src/__pycache__/
 models/

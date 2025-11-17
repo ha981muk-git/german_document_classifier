@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import shutil
 import optuna
 import pandas as pd
 from src.train import train_model
@@ -10,14 +11,34 @@ STORAGE_URL = "sqlite:///optuna_studies.db"
 
 MODELS = [
     "deepset/gbert-base",
-    "dbmdz/bert-base-german-cased",
+    "dbmdz/bert-base-german-cased"
 ]
-
 
 # ------------------------------
 # Objective function for Optuna
 # ------------------------------
-def build_objective(model_name):
+def build_objective(model_name, keep_top_n=2):
+
+    model_root = f"./models/{model_name.replace('/', '_')}/hpo"
+
+    def cleanup_folders(study):
+        """Delete all but top-N trials folders."""
+        df = pd.DataFrame([
+            {"trial": t.number, "value": t.value}
+            for t in study.trials if t.value is not None
+        ])
+
+        if df.empty:
+            return
+
+        top = df.sort_values("value", ascending=False).head(keep_top_n)["trial"].tolist()
+
+        # Delete all except the top-N trials
+        for t in df["trial"]:
+            if t not in top:
+                folder = os.path.join(model_root, f"trial_{t}")
+                if os.path.exists(folder):
+                    shutil.rmtree(folder)
 
     def objective(trial):
 
@@ -27,13 +48,13 @@ def build_objective(model_name):
         weight_decay = trial.suggest_float("weight_decay", 0.0, 0.3)
         batch_size = trial.suggest_categorical("batch_size", [2, 4, 8])
 
-        model_dir = f"./models/{model_name.replace('/', '_')}/hpo/trial_{trial.number}"
-        os.makedirs(model_dir, exist_ok=True)
+        trial_dir = os.path.join(model_root, f"trial_{trial.number}")
+        os.makedirs(trial_dir, exist_ok=True)
 
         metrics = train_model(
             model_name=model_name,
             csv_path=CSV_PATH,
-            save_path=model_dir,
+            save_path=trial_dir,
             learning_rate=lr,
             train_batch=batch_size,
             eval_batch=batch_size,
@@ -44,7 +65,9 @@ def build_objective(model_name):
 
         trial.set_user_attr("metrics", metrics)
 
-        # Return Optuna objective: the F1 score
+        # Clean up after each trial
+        cleanup_folders(trial.study)
+
         return metrics["eval_f1"]
 
     return objective
@@ -54,13 +77,13 @@ def build_objective(model_name):
 # Run HPO for all models
 # ------------------------------
 if __name__ == "__main__":
-    print("🚀 Starting MULTI-MODEL Optuna HPO...")
+    print("🚀 Starting MULTI-MODEL Optuna HPO (Top-2 memory-saving mode)...")
 
     global_best_rows = []
 
     for model_name in MODELS:
 
-        print(f"🔍 Running HPO for model: {model_name}")
+        print(f"\n🔍 Running HPO for model: {model_name}")
 
         base_dir = f"./models/{model_name.replace('/', '_')}/hpo"
         os.makedirs(base_dir, exist_ok=True)
@@ -82,14 +105,14 @@ if __name__ == "__main__":
         with open(best_params_path, "w") as f:
             json.dump(study.best_trial.params, f, indent=4)
 
-        # Save all trials
+        # Save summary of top-2 trials
         rows = []
         for t in study.trials:
             m = t.user_attrs.get("metrics", {})
             rows.append({
                 "model": model_name,
                 "trial": t.number,
-                "eval_f1": t.value,    # <-- FIX HERE
+                "eval_f1": t.value,
                 **t.params,
                 **m
             })
@@ -98,16 +121,15 @@ if __name__ == "__main__":
         csv_path = os.path.join(base_dir, "hpo_results.csv")
         df.to_csv(csv_path, index=False)
 
-        print(f"📄 Saved CSV with all trials: {csv_path}")
+        print(f"📄 Saved CSV: {csv_path}")
 
-        # Save best N
-        trials_sorted = df.sort_values("eval_f1", ascending=False)
-        best_n = trials_sorted.head(2)
+        # Only keep top-2
+        best_n = df.sort_values("eval_f1", ascending=False).head(2)
 
         best_trials_path = os.path.join(base_dir, "best_trials.json")
         best_n.to_json(best_trials_path, orient="records", indent=4)
 
-        print(f"🏆 Saved best trials JSON: {best_trials_path}")
+        print(f"🏆 Saved top-2 trials JSON: {best_trials_path}")
 
         global_best_rows.append(best_n)
 
@@ -117,4 +139,4 @@ if __name__ == "__main__":
     leaderboard.to_csv(leaderboard_path, index=False)
 
     print(f"\n📊 Global leaderboard saved at: {leaderboard_path}")
-    print("\n🎉 ALL HPO FINISHED SUCCESSFULLY!")
+    print("\n🎉 All HPO finished successfully!")

@@ -1,5 +1,6 @@
 # data_loader.py
 import os
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
@@ -10,11 +11,26 @@ from transformers import AutoTokenizer
 from typing import Optional, Tuple
 from transformers import PreTrainedTokenizer
 
+from .utils import save_label_encoder
+
 os.environ["WANDB_DISABLED"] = "true"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-def load_and_prepare_data(csv_path: str, label_classes_output: Optional[str]=None) -> Tuple[DatasetDict, LabelEncoder]:
+def load_and_prepare_data(csv_path: str,
+                          label_classes_output: Optional[str]=None,
+                          test_size: float = 0.2,        
+                          val_size: float = 0.5,         
+                          random_state: int = 42         
+    ) -> Tuple[DatasetDict, LabelEncoder]:
+    csv_path = Path(csv_path)
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV file not found: {csv_path}")
     df = pd.read_csv(csv_path)
+    
+    required_columns = {"text", "label"}
+    missing_columns = required_columns - set(df.columns)
+    if missing_columns:
+        raise ValueError(f"Missing required columns: {missing_columns}")
     df = df[["text", "label"]].dropna()
 
     label_encoder = LabelEncoder()
@@ -22,13 +38,13 @@ def load_and_prepare_data(csv_path: str, label_classes_output: Optional[str]=Non
 
     # Only save label classes during training
     if label_classes_output is not None:
-        np.save(label_classes_output, label_encoder.classes_)
+        save_label_encoder(label_encoder, label_classes_output)
 
     train_df, temp_df = train_test_split(
-        df, test_size=0.2, stratify=df["label"], random_state=42
+        df, test_size=test_size, stratify=df["label"], random_state=random_state
     )
     val_df, test_df = train_test_split(
-        temp_df, test_size=0.5, stratify=temp_df["label"], random_state=42
+        temp_df, test_size=val_size, stratify=temp_df["label"], random_state=random_state
     )
 
     dataset = DatasetDict({
@@ -41,7 +57,7 @@ def load_and_prepare_data(csv_path: str, label_classes_output: Optional[str]=Non
 
 
 
-def tokenize_dataset(dataset:DatasetDict, tokenizer_name: str ="dbmdz/bert-base-german-cased", max_length: int = 512) -> Tuple[DatasetDict, PreTrainedTokenizer]:
+def tokenize_dataset(dataset:DatasetDict, tokenizer_name: str ="dbmdz/bert-base-german-cased", max_length: int = 512,batch_size: int = 1000) -> Tuple[DatasetDict, PreTrainedTokenizer]:
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 
     def tokenize(example):
@@ -52,5 +68,12 @@ def tokenize_dataset(dataset:DatasetDict, tokenizer_name: str ="dbmdz/bert-base-
             max_length=max_length,
         )
 
-    dataset = dataset.map(tokenize, remove_columns=["text"])
+    dataset = dataset.map(
+        tokenize,
+        batched=True,
+        batch_size=batch_size,
+        remove_columns=[col for col in dataset["train"].column_names if col != "label"],
+    )
+
+
     return dataset, tokenizer

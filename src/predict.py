@@ -1,3 +1,4 @@
+from pathlib import Path
 import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -8,21 +9,37 @@ import re
 import io
 import mimetypes
 import docx  # for DOCX files
-from typing import Dict
+from typing import Dict, Any
+
+from .utils import load_label_encoder
+
+# Device detection
+device = (
+    torch.device("cuda") if torch.cuda.is_available() else
+    torch.device("mps") if torch.backends.mps.is_available() else
+    torch.device("cpu")
+)
 
 
-DEFAULT_MODEL = "../models/dbmdz_bert-base-german-cased"
+from pathlib import Path
+
+# Get project root (one level up from src/)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PREDICTION_MODEL = PROJECT_ROOT / "models" / "dbmdz_bert-base-german-cased"
 
 
 class DocumentClassifier:
-    def __init__(self, model_path:str = DEFAULT_MODEL)-> None:
+    def __init__(self, model_path:str = PREDICTION_MODEL)-> None:
         # Load tokenizer + model
+        self.device = device
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSequenceClassification.from_pretrained(model_path)
+        self.model.to(self.device)   # <-- move model to device
         self.model.eval()
 
         # Load label classes for ID → Label mapping
-        self.label_classes = np.load(f"{model_path}/label_classes.npy", allow_pickle=True)
+        self.label_encoder = load_label_encoder(model_path)
+        self.label_classes = self.label_encoder.classes_
 
     # -----------------------
     # CLEAN TEXT (preprocessing)
@@ -31,27 +48,53 @@ class DocumentClassifier:
         text = text.replace("\n", " ")
         text = re.sub(r"<[^>]+>", "", text)
         text = re.sub(r"\s+", " ", text)
-        text = re.sub(r"[^\w\s$€%.,-]", " ", text)
+        text = re.sub(r"[^a-zA-Z0-9äöüÄÖÜß$€%.,\s-]", " ", text)
         return text.lower().strip()
+
+    def page_contains_image(self, page):
+        """Detect whether a PDF page contains image blocks (PyMuPDF type 1)."""
+        try:
+            info = page.get_text("dict")
+        except:
+            return False
+
+        blocks = info.get("blocks", [])
+        if not blocks:
+            return False
+
+        for block in blocks:
+            # PyMuPDF image blocks have type == 1
+            if block.get("type") == 1:
+                return True
+
+        return False
+
 
     # -----------------------
     # EXTRACT TEXT FROM PDF
     # -----------------------
     def extract_text_from_pdf(self, pdf_path: str) -> str:
         text = ""
-        doc = fitz.open(pdf_path)
+        # FIX 4) use context manager to avoid resource leaks
+        with fitz.open(pdf_path) as doc:
+            for page in doc:
 
-        for page in doc:
-            page_text = page.get_text()
+                # If page contains images → OCR fallback
+                if self.page_contains_image(page):
+                    pix = page.get_pixmap(dpi=300)
+                    img = Image.open(io.BytesIO(pix.tobytes()))
+                    text += pytesseract.image_to_string(img, lang="deu")
+                    continue
 
-            if page_text.strip():
-                text += page_text
-            else:
-                # OCR fallback for scanned pages
-                pix = page.get_pixmap(dpi=300)
-                img = Image.open(io.BytesIO(pix.tobytes()))
-                text += pytesseract.image_to_string(img, lang="deu")
-
+                # If page has real selectable text
+                page_text = page.get_text()
+                if page_text.strip():
+                    text += page_text
+                else:
+                    # No detectable text → fallback OCR
+                    pix = page.get_pixmap(dpi=300)
+                    img = Image.open(io.BytesIO(pix.tobytes()))
+                    text += pytesseract.image_to_string(img, lang="deu")
         return text
 
     # -----------------------
@@ -62,7 +105,7 @@ class DocumentClassifier:
         try:
             return pytesseract.image_to_string(img, lang="deu")
         except:
-            return pytesseract.image_to_string(img)  # English fallback
+            return pytesseract.image_to_string(img)  
 
 
     # -----------------------
@@ -105,14 +148,14 @@ class DocumentClassifier:
     # -----------------------
     # UNIVERSAL FILE PREDICT
     # -----------------------
-    def predict_file(self, file_path: str) -> Dict[str, any]:
+    def predict_file(self, file_path: str) -> Dict[str, Any]:
         extracted_text = self.extract_text_from_any(file_path)
         return self.predict(extracted_text)
 
     # -----------------------
     # PREDICT TEXT DIRECTLY
     # -----------------------
-    def predict(self, text: str) -> Dict[str, any]:
+    def predict(self, text: str) -> Dict[str, Any]:
         clean = self.preprocess_text(text)
 
         inputs = self.tokenizer(
@@ -120,15 +163,19 @@ class DocumentClassifier:
             padding=True,
             truncation=True,
             return_tensors="pt"
-        )
+        ).to(self.device)
 
         with torch.no_grad():
             logits = self.model(**inputs).logits
+        probs = torch.softmax(logits, dim=-1)[0]
+        pred_id = int(probs.argmax())
+        confidence = float(probs[pred_id])
 
-        pred_id = logits.argmax(dim=-1).cpu().numpy()[0]
+        # pred_id = logits.argmax(dim=-1).cpu().numpy()[0]
         label = self.label_classes[pred_id]
 
         return {
             "label": str(label),
-            "label_id": int(pred_id)
+            "label_id": pred_id,
+            "confidence": confidence
         }

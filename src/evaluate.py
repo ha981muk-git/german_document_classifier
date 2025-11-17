@@ -5,34 +5,53 @@ import numpy as np
 from transformers import AutoModelForSequenceClassification
 from .data_loader import load_and_prepare_data, tokenize_dataset
 from typing import Dict
+from transformers import AutoTokenizer
+from torch.utils.data import DataLoader
+from sklearn.metrics import precision_recall_fscore_support
 
+# Device detection
+device = (
+    torch.device("cuda") if torch.cuda.is_available() else
+    torch.device("mps") if torch.backends.mps.is_available() else
+    torch.device("cpu")
+)
 
 def evaluate_model(model_path: str, csv_path: str) -> Dict[str, float]:
+    # 1. Load data
     dataset, label_encoder = load_and_prepare_data(csv_path)
-    dataset, tokenizer = tokenize_dataset(dataset, tokenizer_name=model_path)
 
+    # 2. Load tokenizer correctly
+    dataset, _ = tokenize_dataset(dataset, tokenizer_name=model_path)
+    dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
+
+    # 3. Load model and set device
     model = AutoModelForSequenceClassification.from_pretrained(model_path)
+    model.to(device)
     model.eval()
 
-    test_dataset = dataset["test"]
+    # 4. Batch loader
+    test_loader = DataLoader(dataset["test"], batch_size=16)
 
-    logits_list = []
-    labels_list = []
+    all_preds = []
+    all_labels = []
 
-    for batch in test_dataset:
-        inputs = {
-            "input_ids": torch.tensor([batch["input_ids"]]),
-            "attention_mask": torch.tensor([batch["attention_mask"]])
-        }
+    # 5. Iterate batches
+    for batch in test_loader:
+        input_ids = batch["input_ids"].to(device)
+        attention_mask = batch["attention_mask"].to(device)
+        labels = batch["label"].to(device)
 
         with torch.no_grad():
-            logits = model(**inputs).logits
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
 
-        logits_list.append(logits)
-        labels_list.append(batch["label"])
+        preds = logits.argmax(dim=1)
 
-    preds = torch.cat(logits_list).argmax(dim=1).numpy()
-    labels = np.array(labels_list)
+        all_preds.extend(preds.cpu().numpy())
+        all_labels.extend(labels.cpu().numpy())
 
-    acc = (preds == labels).mean()
-    return {"accuracy": float(acc)}
+    all_preds = np.array(all_preds)
+    all_labels = np.array(all_labels)
+
+    accuracy = float((all_preds == all_labels).mean())
+
+    return {"accuracy": accuracy}

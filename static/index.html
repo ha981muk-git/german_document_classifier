@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>BERT based AI Document Classifier</title>
+    <title>AI Document Classifier</title>
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -10,7 +10,7 @@
 </head>
 <body>
 
-<h2>AI Document Classifier</h2>
+<h2>AI Document Classifier Powered by BERT</h2>
 
 <div class="box">
     <h3>Enter Text</h3>
@@ -18,8 +18,17 @@
 </div>
 
 <div class="box">
-    <h3>Upload PDF</h3>
-    <input type="file" id="fileInput" accept="application/pdf" />
+    <h3>Upload Document</h3>
+    <input type="file" id="fileInput"
+       accept="application/pdf,
+               application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+               .doc,
+               .txt,
+               .json,
+               .csv,
+               image/*" />
+
+    <small>Supported formats: PDF, Images, Text files, DOCX</small>
 </div>
 
 <button id="submitBtn" onclick="predict()">🚀 Submit for Prediction</button>

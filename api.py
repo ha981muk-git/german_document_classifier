@@ -6,53 +6,73 @@ from typing import Optional
 from src.predict import DocumentClassifier
 import uuid
 import os
+import mimetypes
+
 
 app = FastAPI()
 
 # --- ENABLE CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # allow frontend access
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Mount static files (if you have other static files, they go in the "static" directory)
+# Serve static frontend
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Serve the index.html at the root
 @app.get("/")
 async def read_index():
     return FileResponse('static/index.html')
 
-# Load once
-classifier = DocumentClassifier("models/dbmdz_bert-base-german-cased")
+
+# Load model once
+classifier = DocumentClassifier("./models/dbmdz_bert-base-german-cased")
+
 
 @app.post("/predict")
 async def predict(
     text: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None)
 ):
-    # If PDF provided
+    # -----------------------
+    # CASE 1 — File uploaded
+    # -----------------------
     if file:
-        if not file.filename.lower().endswith(".pdf"):
-            return {"error": "Only PDF files allowed"}
-
-        temp_name = f"temp_{uuid.uuid4()}.pdf"
-
+        # Save temporarily
+        temp_name = f"temp_{uuid.uuid4()}_{file.filename}"
         with open(temp_name, "wb") as f:
             f.write(await file.read())
 
-        result = classifier.predict_pdf(temp_name)
+        try:
+            # Use universal extractor
+            result = classifier.predict_file(temp_name)
+        except ValueError as e:
+            os.remove(temp_name)
+            return {"error": str(e)}
+        finally:
+            if os.path.exists(temp_name):
+                os.remove(temp_name)
 
-        os.remove(temp_name)
+        mime_type, _ = mimetypes.guess_type(file.filename)
 
-        return {"mode": "pdf", "result": result}
+        return {
+            "mode": "file",
+            "filename": file.filename,
+            "mime_type": mime_type,
+            "result": result
+        }
 
-    # If Text provided
+    # -----------------------
+    # CASE 2 — Raw text
+    # -----------------------
     if text:
         result = classifier.predict(text)
         return {"mode": "text", "result": result}
 
-    return {"error": "Provide either a PDF or text"}
+    # -----------------------
+    # CASE 3 — Nothing provided
+    # -----------------------
+    return {"error": "Provide text or upload a file"}

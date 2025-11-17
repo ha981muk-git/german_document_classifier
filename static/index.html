@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BERT based AI Document Classifier</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./static/style.css">
+
+</head>
+<body>
+
+<h2>AI Document Classifier</h2>
+
+<div class="box">
+    <h3>Enter Text</h3>
+    <textarea id="textInput" rows="4" placeholder="Type or paste document text here…"></textarea>
+</div>
+
+<div class="box">
+    <h3>Upload PDF</h3>
+    <input type="file" id="fileInput" accept="application/pdf" />
+</div>
+
+<button id="submitBtn" onclick="predict()">🚀 Submit for Prediction</button>
+<button id="clearBtn" onclick="clearForm()">Clear</button>
+
+<div id="status"></div>
+
+<!-- Result Box -->
+<div id="resultBox" style="display:none;"></div>
+
+<script>
+const API_BASE = "http://127.0.0.1:8000";
+
+function showStatus(msg, type) {
+    const st = document.getElementById("status");
+    st.style.display = "block";
+    st.textContent = msg;
+    st.className = type === "error" ? "error" : "success";
+}
+
+function clearForm() {
+    document.getElementById("textInput").value = "";
+    document.getElementById("fileInput").value = "";
+    document.getElementById("resultBox").style.display = "none";
+    document.getElementById("status").style.display = "none";
+}
+
+async function predict() {
+    const file = document.getElementById("fileInput").files[0];
+    const text = document.getElementById("textInput").value.trim();
+    const btn = document.getElementById("submitBtn");
+
+    if (!file && !text) {
+        showStatus("⚠️ Please provide text or upload a PDF.", "error");
+        return;
+    }
+
+    const formData = new FormData();
+    if (file) formData.append("file", file);
+    if (text) formData.append("text", text);
+
+    btn.disabled = true;
+    btn.textContent = "⏳ Processing…";
+    showStatus("⏳ Classifying…", "success");
+
+    try {
+        const res = await fetch(`${API_BASE}/predict`, { method: "POST", body: formData });
+        if (!res.ok) throw new Error("Server error: " + res.status);
+
+        const data = await res.json();
+        btn.textContent = "🚀 Submit for Prediction";
+        btn.disabled = false;
+
+        if (data.error) {
+            showStatus("❌ " + data.error, "error");
+            return;
+        }
+
+        showStatus("✅ Classification complete!", "success");
+
+        const box = document.getElementById("resultBox");
+        box.style.display = "block";
+
+        box.innerHTML = `
+            <div class="label-title">Classified as: ${data.result.label.toUpperCase()}</div>
+
+            <div class="details">
+                <strong>Details:</strong><br>
+                Mode: ${data.mode}<br>
+                Label: ${data.result.label}<br>
+                Label ID: ${data.result.label_id}
+            </div>
+
+            <br>
+            <strong>Full JSON Response:</strong>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+        `;
+
+    } catch (err) {
+        btn.textContent = "🚀 Submit for Prediction";
+        btn.disabled = false;
+        showStatus("❌ Error: " + err.message, "error");
+    }
+}
+</script>
+
+</body>
+</html>

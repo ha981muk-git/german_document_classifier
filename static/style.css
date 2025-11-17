@@ -1,0 +1,111 @@
+    body { 
+        font-family: 'Inter', sans-serif;
+        max-width: 780px; 
+        margin: 40px auto; 
+        padding: 20px;
+        background: #f8f9fa;
+    }
+
+    h2 {
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    h2::before {
+        content: "📄";
+        font-size: 28px;
+    }
+
+    .box { 
+        background: white;
+        border-radius: 12px;
+        padding: 20px; 
+        margin-bottom: 20px;
+        box-shadow: rgba(0,0,0,0.06) 0px 4px 12px;
+    }
+
+    textarea, input[type="file"] {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 15px;
+        box-sizing: border-box; /* ← THE IMPORTANT FIX */
+    }
+
+
+    button { 
+        padding: 12px 24px; 
+        cursor: pointer; 
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    #submitBtn {
+        background: #0066ff;
+        color: white;
+        box-shadow: 0 2px 6px rgba(0, 102, 255, 0.3);
+    }
+
+    #submitBtn:hover {
+        background: #0052cc;
+    }
+
+    #clearBtn {
+        background: #6c757d;
+        color: white;
+        margin-left: 10px;
+    }
+
+    #status {
+        display: none;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 15px;
+        font-weight: 500;
+    }
+
+    #status.success { background: #e6ffed; color: #007a1c; border: 1px solid #b6f2c2; }
+    #status.error   { background: #ffecec; color: #c60000; border: 1px solid #f7b3b3; }
+
+    #resultBox {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: rgba(0,0,0,0.05) 0px 4px 12px;
+    }
+
+    .label-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0052cc;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .label-title::before {
+        content: "📘";
+        font-size: 28px;
+    }
+
+    pre {
+        background: #f4f6f8;
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 13px;
+    }
+
+    .details {
+        margin-top: 15px;
+        line-height: 1.6;
+        font-size: 15px;
+    }

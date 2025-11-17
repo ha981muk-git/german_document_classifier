@@ -8,13 +8,14 @@ import re
 import io
 import mimetypes
 import docx  # for DOCX files
+from typing import Dict
 
 
 DEFAULT_MODEL = "../models/dbmdz_bert-base-german-cased"
 
 
 class DocumentClassifier:
-    def __init__(self, model_path=DEFAULT_MODEL):
+    def __init__(self, model_path:str = DEFAULT_MODEL)-> None:
         # Load tokenizer + model
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSequenceClassification.from_pretrained(model_path)
@@ -26,7 +27,7 @@ class DocumentClassifier:
     # -----------------------
     # CLEAN TEXT (preprocessing)
     # -----------------------
-    def preprocess_text(self, text):
+    def preprocess_text(self, text: str) -> str:
         text = text.replace("\n", " ")
         text = re.sub(r"<[^>]+>", "", text)
         text = re.sub(r"\s+", " ", text)
@@ -36,7 +37,7 @@ class DocumentClassifier:
     # -----------------------
     # EXTRACT TEXT FROM PDF
     # -----------------------
-    def extract_text_from_pdf(self, pdf_path):
+    def extract_text_from_pdf(self, pdf_path: str) -> str:
         text = ""
         doc = fitz.open(pdf_path)
 
@@ -56,7 +57,7 @@ class DocumentClassifier:
     # -----------------------
     # EXTRACT TEXT FROM IMAGE (OCR)
     # -----------------------
-    def extract_text_from_image(self, image_path):
+    def extract_text_from_image(self, image_path: str) -> str:
         img = Image.open(image_path)
         try:
             return pytesseract.image_to_string(img, lang="deu")
@@ -67,7 +68,7 @@ class DocumentClassifier:
     # -----------------------
     # EXTRACT TEXT FROM DOCX
     # -----------------------
-    def extract_text_from_docx(self, docx_path):
+    def extract_text_from_docx(self, docx_path: str) -> str:
         document = docx.Document(docx_path)
         return "\n".join([p.text for p in document.paragraphs])
 
@@ -75,7 +76,7 @@ class DocumentClassifier:
     # UNIVERSAL EXTRACTOR
     # Handles PDF, image, text, docx
     # -----------------------
-    def extract_text_from_any(self, file_path):
+    def extract_text_from_any(self, file_path: str)  -> str:
         mime, _ = mimetypes.guess_type(file_path)
 
         if mime is None:
@@ -104,14 +105,14 @@ class DocumentClassifier:
     # -----------------------
     # UNIVERSAL FILE PREDICT
     # -----------------------
-    def predict_file(self, file_path):
+    def predict_file(self, file_path: str) -> Dict[str, any]:
         extracted_text = self.extract_text_from_any(file_path)
         return self.predict(extracted_text)
 
     # -----------------------
     # PREDICT TEXT DIRECTLY
     # -----------------------
-    def predict(self, text):
+    def predict(self, text: str) -> Dict[str, any]:
         clean = self.preprocess_text(text)
 
         inputs = self.tokenizer(

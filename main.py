@@ -1,12 +1,11 @@
 # main.py
 import sys
-sys.path.append("/content")
 
 from src.train import train_model
 from src.evaluate import evaluate_model
 
 MODELS = [
-    "deepset/gbert-base",
+#    "deepset/gbert-base",
     "dbmdz/bert-base-german-cased",
 ]
 

@@ -7,12 +7,13 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from datasets import Dataset, DatasetDict
 from transformers import AutoTokenizer
+from typing import Optional, Tuple
+from transformers import PreTrainedTokenizer
 
 os.environ["WANDB_DISABLED"] = "true"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-
-def load_and_prepare_data(csv_path, label_classes_output=None):
+def load_and_prepare_data(csv_path: str, label_classes_output: Optional[str]=None) -> Tuple[DatasetDict, LabelEncoder]:
     df = pd.read_csv(csv_path)
     df = df[["text", "label"]].dropna()
 
@@ -40,7 +41,7 @@ def load_and_prepare_data(csv_path, label_classes_output=None):
 
 
 
-def tokenize_dataset(dataset, tokenizer_name="dbmdz/bert-base-german-cased", max_length=512):
+def tokenize_dataset(dataset:DatasetDict, tokenizer_name: str ="dbmdz/bert-base-german-cased", max_length: int = 512) -> Tuple[DatasetDict, PreTrainedTokenizer]:
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 
     def tokenize(example):

@@ -1,6 +1,5 @@
 from metaflow import FlowSpec, step, Parameter
 import sys
-sys.path.append("./src")  # Remove this line
 from src.train import train_model  
 
 GERMAN_MODELS = [

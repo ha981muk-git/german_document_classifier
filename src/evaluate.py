@@ -4,9 +4,10 @@ import torch
 import numpy as np
 from transformers import AutoModelForSequenceClassification
 from .data_loader import load_and_prepare_data, tokenize_dataset
+from typing import Dict
 
 
-def evaluate_model(model_path: str, csv_path: str):
+def evaluate_model(model_path: str, csv_path: str) -> Dict[str, float]:
     dataset, label_encoder = load_and_prepare_data(csv_path)
     dataset, tokenizer = tokenize_dataset(dataset, tokenizer_name=model_path)
 

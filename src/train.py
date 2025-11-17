@@ -1,3 +1,4 @@
+from typing import Dict, Optional
 import torch, os
 from transformers import AutoModelForSequenceClassification, AutoConfig, TrainingArguments, Trainer
 from .data_loader import load_and_prepare_data, tokenize_dataset
@@ -39,7 +40,7 @@ def train_model(
     warmup_steps: int = 0,
     gradient_accumulation: int = None,  
     dropout: float = None,
-):
+)-> Dict[str, float]:
 
     print(f"📌 Using device: {device}")
 

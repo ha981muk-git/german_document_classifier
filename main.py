@@ -3,9 +3,10 @@ import sys
 
 from src.train import train_model
 from src.evaluate import evaluate_model
+from pathlib import Path
 
 MODELS = [
-#    "deepset/gbert-base",
+    "deepset/gbert-base",
     "dbmdz/bert-base-german-cased",
 ]
 
@@ -18,7 +19,8 @@ if __name__ == "__main__":
     for model_name in MODELS:
         print(f"🚀 Training {model_name}")
 
-        save_path = f"models/{model_name.replace('/', '_')}"
+ 
+        save_path = str(Path("models") / model_name.replace('/', '_'))
 
         # Train
         train_metrics = train_model(
@@ -26,7 +28,7 @@ if __name__ == "__main__":
             csv_path=CSV_PATH,
             save_path=save_path,
             learning_rate=3e-5,
-            epochs=1
+            epochs=3
         )
 
         print("\nTraining metrics:")

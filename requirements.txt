@@ -1,0 +1,13 @@
+numpy
+pandas
+scikit-learn
+transformers
+datasets
+evaluate
+sentencepiece
+accelerate
+pymupdf
+pytesseract
+metaflow
+optuna
+torch

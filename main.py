@@ -1,15 +1,15 @@
 # main.py
+import sys
+sys.path.append("/content")
 
 from src.train import train_model
 from src.evaluate import evaluate_model
 
 MODELS = [
-    "deepset/gbert-large",
     "deepset/gbert-base",
-    "deepset/gelectra-base",
     "dbmdz/bert-base-german-cased",
-    "xlm-roberta-base",
 ]
+
 
 
 CSV_PATH = "data/data_processed/all_data.csv"
@@ -29,9 +29,7 @@ if __name__ == "__main__":
             csv_path=CSV_PATH,
             save_path=save_path,
             learning_rate=3e-5,
-            epochs=1,
-            train_batch=8,
-            eval_batch=16
+            epochs=1
         )
 
         print("\nTraining metrics:")

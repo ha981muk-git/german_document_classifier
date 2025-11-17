@@ -6,13 +6,11 @@ from src.train import train_model
 
 CSV_PATH = "./data/data_processed/all_data.csv"
 
-GERMAN_MODELS = [
-    "deepset/gbert-large",
+MODELS = [
     "deepset/gbert-base",
-    "deepset/gelectra-base",
     "dbmdz/bert-base-german-cased",
-    "xlm-roberta-base",
 ]
+
 
 
 # ------------------------------
@@ -26,7 +24,8 @@ def build_objective(model_name):
         lr = trial.suggest_float("learning_rate", 1e-6, 5e-5, log=True)
         dropout = trial.suggest_float("dropout", 0.0, 0.3)
         weight_decay = trial.suggest_float("weight_decay", 0.0, 0.3)
-        batch_size = trial.suggest_categorical("batch_size", [8, 16, 32])
+        batch_size = trial.suggest_categorical("batch_size", [2, 4, 8])
+
 
         model_dir = f"./models/{model_name.replace('/', '_')}/hpo/trial_{trial.number}"
         os.makedirs(model_dir, exist_ok=True)
@@ -38,7 +37,7 @@ def build_objective(model_name):
             learning_rate=lr,
             train_batch=batch_size,
             eval_batch=batch_size,
-            epochs=2,
+            epochs=3,
             weight_decay=weight_decay,
             dropout=dropout
         )
@@ -59,7 +58,7 @@ if __name__ == "__main__":
 
     global_best_rows = []  # For final leaderboard CSV
 
-    for model_name in GERMAN_MODELS:
+    for model_name in MODELS:
 
         
         print(f"🔍 Running HPO for model: {model_name}")
@@ -76,7 +75,10 @@ if __name__ == "__main__":
             study_name=f"hpo_{model_name.replace('/', '_')}",
             storage=f"sqlite:///{study_path}",
             load_if_exists=True,
+            pruner=optuna.pruners.MedianPruner(),
+            sampler=optuna.samplers.TPESampler(seed=42)  # safer and deterministic
         )
+
 
         objective = build_objective(model_name)
 
@@ -127,7 +129,9 @@ if __name__ == "__main__":
     # -------------------------------
     # Save GLOBAL leaderboard CSV
     # -------------------------------
-    leaderboard = pd.concat(global_best_rows, ignore_index=True)
+    if global_best_rows:
+        leaderboard = pd.concat(global_best_rows, ignore_index=True)
+
     leaderboard_path = "./models/hpo_leaderboard.csv"
     leaderboard.to_csv(leaderboard_path, index=False)
 

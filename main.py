@@ -10,8 +10,6 @@ MODELS = [
     "dbmdz/bert-base-german-cased",
 ]
 
-
-
 CSV_PATH = "data/data_processed/all_data.csv"
 
 

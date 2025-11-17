@@ -3,24 +3,21 @@ from transformers import AutoModelForSequenceClassification, AutoConfig, Trainin
 from .data_loader import load_and_prepare_data, tokenize_dataset
 from sklearn.metrics import precision_recall_fscore_support
 
+# Device detection
 device = (
-    torch.device("mps") if torch.backends.mps.is_available() else
     torch.device("cuda") if torch.cuda.is_available() else
+    torch.device("mps") if torch.backends.mps.is_available() else
     torch.device("cpu")
 )
 
-
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
-
-    # logits and labels are already numpy arrays
     preds = logits.argmax(-1)
-
     p, r, f1, _ = precision_recall_fscore_support(
         labels, preds, average="weighted", zero_division=0
     )
     acc = (preds == labels).mean()
-
+    
     return {
         "accuracy": float(acc),
         "precision": float(p),
@@ -36,17 +33,44 @@ def train_model(
     save_path: str,
     learning_rate: float = 3e-5,
     epochs: int = 1,
-    train_batch: int = 8,
-    eval_batch: int = 16,
+    train_batch: int = None,  
+    eval_batch: int = None,   
     weight_decay: float = 0.0,
     warmup_steps: int = 0,
-    gradient_accumulation: int = 1,
+    gradient_accumulation: int = None,  
     dropout: float = None,
 ):
-    # Load dataset
+
+    print(f"📌 Using device: {device}")
+
+    # Adaptive batch size based on device
+    # If user did NOT provide batch sizes, auto-adjust safely
+    # Adaptive batch size based on device
+    if train_batch is None:
+        if device.type == "cuda":
+            fp16 = True
+            train_batch = 4
+            eval_batch = eval_batch or 8
+            gradient_accumulation = gradient_accumulation or 2
+        elif device.type == "mps":
+            fp16 = False
+            train_batch = 4
+            eval_batch = eval_batch or 8
+            gradient_accumulation = gradient_accumulation or 2
+        else:  # CPU
+            fp16 = False
+            train_batch = 2
+            eval_batch = eval_batch or 4
+            gradient_accumulation = gradient_accumulation or 4
+    else:
+        # User provided batch sizes
+        fp16 = (device.type == "cuda")
+        eval_batch = eval_batch or train_batch * 2  # Default eval batch to 2x train
+        gradient_accumulation = gradient_accumulation or 1
+
+
     os.makedirs(save_path, exist_ok=True)
 
-    # Load dataset and save label classes inside model folder
     dataset, label_encoder = load_and_prepare_data(
         csv_path,
         label_classes_output=f"{save_path}/label_classes.npy"
@@ -54,37 +78,47 @@ def train_model(
 
     dataset, tokenizer = tokenize_dataset(dataset, tokenizer_name=model_name)
 
-    # Load model config for dropout tuning
+    # Load model
     if dropout is None:
         model = AutoModelForSequenceClassification.from_pretrained(
             model_name,
             num_labels=len(label_encoder.classes_),
             ignore_mismatched_sizes=True
         ).to(device)
-
     else:
         config = AutoConfig.from_pretrained(model_name)
         config.num_labels = len(label_encoder.classes_)
         config.hidden_dropout_prob = dropout
         config.attention_probs_dropout_prob = dropout
-        model = AutoModelForSequenceClassification.from_config(config).to(device)
+        model = AutoModelForSequenceClassification.from_pretrained(
+            model_name,
+            config=config,  # ← Pass config here
+            ignore_mismatched_sizes=True
+        ).to(device)
 
-    # Training arguments
+
+    # TrainingArguments
     args = TrainingArguments(
         output_dir=save_path,
         num_train_epochs=epochs,
         learning_rate=learning_rate,
-        warmup_steps=warmup_steps,
         weight_decay=weight_decay,
-        per_device_train_batch_size=train_batch,
-        per_device_eval_batch_size=eval_batch,
-        gradient_accumulation_steps=gradient_accumulation,
+        warmup_steps=warmup_steps,
+
+        per_device_train_batch_size=train_batch, 
+        per_device_eval_batch_size=eval_batch,    
+        gradient_accumulation_steps=gradient_accumulation,  
+
         eval_strategy="epoch",
         save_strategy="epoch",
         save_total_limit=1,
         logging_steps=50,
+
+        fp16=fp16,
+        gradient_checkpointing=(device.type == "cuda"),
         report_to="none",
     )
+
 
     trainer = Trainer(
         model=model,
@@ -96,9 +130,8 @@ def train_model(
 
     trainer.train()
 
-    # Save artifacts
     model.save_pretrained(save_path)
     tokenizer.save_pretrained(save_path)
 
-    # Return metrics for hyperparameter comparison
     return trainer.evaluate()
+

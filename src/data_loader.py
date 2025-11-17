@@ -12,17 +12,23 @@ os.environ["WANDB_DISABLED"] = "true"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
-def load_and_prepare_data(csv_path, label_classes_output="./models/label_classes.npy"):
+def load_and_prepare_data(csv_path, label_classes_output=None):
     df = pd.read_csv(csv_path)
     df = df[["text", "label"]].dropna()
 
     label_encoder = LabelEncoder()
     df["label"] = label_encoder.fit_transform(df["label"])
 
-    np.save(label_classes_output, label_encoder.classes_)
+    # Only save label classes during training
+    if label_classes_output is not None:
+        np.save(label_classes_output, label_encoder.classes_)
 
-    train_df, temp_df = train_test_split(df, test_size=0.2, stratify=df["label"], random_state=42)
-    val_df, test_df = train_test_split(temp_df, test_size=0.5, stratify=temp_df["label"], random_state=42)
+    train_df, temp_df = train_test_split(
+        df, test_size=0.2, stratify=df["label"], random_state=42
+    )
+    val_df, test_df = train_test_split(
+        temp_df, test_size=0.5, stratify=temp_df["label"], random_state=42
+    )
 
     dataset = DatasetDict({
         "train": Dataset.from_dict(train_df.to_dict("list")),
@@ -31,6 +37,7 @@ def load_and_prepare_data(csv_path, label_classes_output="./models/label_classes
     })
 
     return dataset, label_encoder
+
 
 
 def tokenize_dataset(dataset, tokenizer_name="dbmdz/bert-base-german-cased", max_length=512):

@@ -1,4 +1,4 @@
-import torch
+import torch, os
 from transformers import AutoModelForSequenceClassification, AutoConfig, TrainingArguments, Trainer
 from .data_loader import load_and_prepare_data, tokenize_dataset
 from sklearn.metrics import precision_recall_fscore_support
@@ -44,7 +44,14 @@ def train_model(
     dropout: float = None,
 ):
     # Load dataset
-    dataset, label_encoder = load_and_prepare_data(csv_path)
+    os.makedirs(save_path, exist_ok=True)
+
+    # Load dataset and save label classes inside model folder
+    dataset, label_encoder = load_and_prepare_data(
+        csv_path,
+        label_classes_output=f"{save_path}/label_classes.npy"
+    )
+
     dataset, tokenizer = tokenize_dataset(dataset, tokenizer_name=model_name)
 
     # Load model config for dropout tuning

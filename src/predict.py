@@ -4,11 +4,10 @@ import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from PIL import Image
-import fitz
+import fitz  # PyMuPDF
 import pytesseract
 import re
 import io
-import numpy as np
 
 DEFAULT_MODEL = "../models/dbmdz_bert-base-german-cased"
 
@@ -19,12 +18,11 @@ class DocumentClassifier:
         self.model = AutoModelForSequenceClassification.from_pretrained(model_path)
         self.model.eval()
 
-        # Load label classes
+        # Load label classes for ID → Label mapping
         self.label_classes = np.load(f"{model_path}/label_classes.npy", allow_pickle=True)
 
-
     # -----------------------
-    # TEXT PREPROCESSING
+    # CLEAN TEXT (preprocessing)
     # -----------------------
     def preprocess_text(self, text):
         text = text.replace("\n", " ")
@@ -34,21 +32,24 @@ class DocumentClassifier:
         return text.lower().strip()
 
     # -----------------------
-    # PDF EXTRACTION + OCR
+    # EXTRACT TEXT FROM PDF
     # -----------------------
     def extract_text_from_pdf(self, pdf_path):
         text = ""
         doc = fitz.open(pdf_path)
 
         for page in doc:
+            # Extract text normally
             page_text = page.get_text()
 
             if page_text.strip():
                 text += page_text
             else:
+                # OCR fallback if page has no text layer
                 pix = page.get_pixmap(dpi=300)
                 img = Image.open(io.BytesIO(pix.tobytes()))
-                text += pytesseract.image_to_string(img)
+
+                text += pytesseract.image_to_string(img, lang="deu")
 
         return text
 
@@ -80,5 +81,5 @@ class DocumentClassifier:
     # PREDICT PDF
     # -----------------------
     def predict_pdf(self, pdf_path):
-        raw_text = self.extract_text_from_pdf(pdf_path)
-        return self.predict(raw_text)
+        extracted = self.extract_text_from_pdf(pdf_path)
+        return self.predict(extracted)

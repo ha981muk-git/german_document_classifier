@@ -8,12 +8,10 @@ scikit-learn
 huggingface_hub
 sentencepiece
 safetensors
-torch
-torchvision
-torchaudio
 ipywidgets
 tqdm
 python-docx
 pyyaml
 python-dotenv
 tabulate
+metaflow

@@ -75,23 +75,33 @@ python main.py
 ```
 ## **2.5 FastAPI Web Server**
 
-
+The FastAPI service wraps the trained `DocumentClassifier` and exposes a single `/predict` endpoint that powers both the web UI and any programmatic client. It accepts either a `text` form field (for raw strings) or a `file` upload (for PDFs, images, or DOCs) and routes the request to the right inference path. Because the server also mounts the static frontend under `/`, you only need one process to serve both the UI and the API.
 
 Start the server:
 ```bash
 uvicorn api:app --reload --port 8000
 ```
 
+Send free‑form text for classification:
+```bash
+curl -X POST http://127.0.0.1:8000/predict \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "text=Dies ist eine deutsche Beispielrechnung."
+```
 
-
+Send pdf for classification:
+```bash
+curl -X POST http://127.0.0.1:8000/predict \
+     -F "file=@data/data_raw/contracts/01_Vertrag.pdf;type=application/pdf"
+```
 ### Open the UI:
 👉 http://localhost:8000
 
 ### Allows:
 
-1. **✔ Uploading PDFs, images**
-2. **✔ Text classification**
-3. **✔ Real-time inference**
+1. **✔ Uploading PDFs, images:** `classifier.predict_file` extracts text via OCR/loader logic before inference.
+2. **✔ Text classification:** Directly send German text via the form field or curl request.
+3. **✔ Real-time inference:** The model is loaded once at startup, keeping latency low for repeated predictions.
 
 
 
@@ -379,4 +389,3 @@ The developed system integrates:
 This appendix provides the technical foundation for interpreting and reproducing the experimental results presented in the main chapters of the project.
 
 ---
-

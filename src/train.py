@@ -115,11 +115,11 @@ def train_model(
         gradient_accumulation_steps=grad_accum,  
 
         eval_strategy="epoch",
-        save_strategy="epoch",
+        save_strategy="no", # epoch. # fixing frequent checkpoint saves 
         save_total_limit=1,
         logging_steps=50,
 
-        load_best_model_at_end=True,
+        load_best_model_at_end=False, # True ← Disabled to save memory
         metric_for_best_model="f1",
         greater_is_better=True,
 

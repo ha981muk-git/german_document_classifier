@@ -124,7 +124,8 @@ def train_model(
         greater_is_better=True,
 
         fp16=use_fp16,
-        gradient_checkpointing=(device.type == "cuda"),
+        gradient_checkpointing=False,
+        #gradient_checkpointing=(device.type == "cuda"),
         report_to="none",
     )
 

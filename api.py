@@ -7,6 +7,7 @@ from src.predict import DocumentClassifier
 import uuid
 import os
 import mimetypes
+from pathlib import Path
 
 
 app = FastAPI()
@@ -29,7 +30,9 @@ async def read_index():
 
 
 # Load model once
-classifier = DocumentClassifier("./models/dbmdz_bert-base-german-cased")
+
+model_path = Path("models") / "dbmdz_bert-base-german-cased"
+classifier = DocumentClassifier(str(model_path))
 
 
 @app.post("/predict")

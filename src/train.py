@@ -177,5 +177,6 @@ def train_model(
 
     # Evaluate on test set and return metrics
     return trainer.evaluate(eval_dataset=dataset["test"])
-    
+    # also work for default 
+    # return trainer.evaluate()
     """

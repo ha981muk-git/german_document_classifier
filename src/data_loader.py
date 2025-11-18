@@ -18,7 +18,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def load_and_prepare_data(csv_path: str,
                           label_classes_output: Optional[str]=None,
-                          test_size: float = 0.2,        
+                          test_size: float = 0.4,        
                           val_size: float = 0.5,         
                           random_state: int = 42         
     ) -> Tuple[DatasetDict, LabelEncoder]:

@@ -1,7 +1,7 @@
 from metaflow import FlowSpec, step, Parameter
 import sys
 from src.train import train_model  
-
+from pathlib import Path
 GERMAN_MODELS = [
     "dbmdz/bert-base-german-cased",
     "bert-base-german-dbmdz-cased",
@@ -29,7 +29,8 @@ class GermanModelFlow(FlowSpec):
         model_name = self.input
         print(f"Training: {model_name}")
 
-        save_path = f"../models/{model_name.replace('/', '_')}"
+        
+        save_path = str(Path("models") / model_name.replace('/', '_'))
 
         self.metrics = train_model(
             model_name=model_name,

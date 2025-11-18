@@ -5,6 +5,7 @@ import shutil
 import optuna
 import pandas as pd
 from src.train import train_model
+from pathlib import Path
 
 CSV_PATH = "./data/data_processed/all_data.csv"
 STORAGE_URL = "sqlite:///optuna_studies.db"
@@ -19,7 +20,8 @@ MODELS = [
 # ------------------------------
 def build_objective(model_name, keep_top_n=2):
 
-    model_root = f"./models/{model_name.replace('/', '_')}/hpo"
+
+    model_root = str(Path("models") / model_name.replace('/', '_') / "hpo")
 
     def cleanup_folders(study):
         """Delete all but top-N trials folders."""
@@ -85,7 +87,7 @@ if __name__ == "__main__":
 
         print(f"\n🔍 Running HPO for model: {model_name}")
 
-        base_dir = f"./models/{model_name.replace('/', '_')}/hpo"
+        base_dir = str(Path("models") / model_name.replace('/', '_') / "hpo")
         os.makedirs(base_dir, exist_ok=True)
 
         study_name = f"hpo_{model_name.replace('/', '_')}_{int(time.time())}"

@@ -1,4 +1,2 @@
-datasets==4.4.1
 evaluate
 python-docx
-pyarrow==19.0.1

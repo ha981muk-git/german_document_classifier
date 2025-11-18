@@ -93,15 +93,15 @@ uvicorn api:app --reload --port 8000
 2. **✔ Text classification**
 3. **✔ Real-time inference**
 
-# **3. 📁 Project Structure**
+
 
 ### **2.6 Hyperparameter Searching**
 
 ```bash
 python hyperparamsearch.py
 ```
-## **2.4 Training the BERT Models**
 
+## **3. 📁 Project Structure**
 
 ```text
 german_document_classifier/

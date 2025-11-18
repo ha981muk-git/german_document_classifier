@@ -10,7 +10,7 @@ All installation steps, architecture explanations, and usage instructions from t
 
 # **1. 🚀 Getting Started**
 
-## **1.1 Running in Google Colab (Recommended)**
+## **1.1 Running in Google Colab**
 
 If the project is stored in Google Drive:
 

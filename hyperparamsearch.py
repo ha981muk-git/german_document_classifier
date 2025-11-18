@@ -100,12 +100,12 @@ if __name__ == "__main__":
         )
 
         objective = build_objective(model_name)
-        study.optimize(objective, n_trials=5)
+        study.optimize(objective, n_trials=4)
 
         # ============================
         # SAFE CLEANUP (simple & clean)
         # ============================
-        cleanup_folders(study, model_root, keep_top_n=2)
+        cleanup_folders(study, model_root, keep_top_n=1)
 
         # Save best hyperparameters
         best_params_path = os.path.join(model_root, "best_hyperparams.json")

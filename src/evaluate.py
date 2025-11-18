@@ -21,7 +21,7 @@ def evaluate_model(model_path: str, csv_path: str) -> Dict[str, float]:
     dataset, label_encoder = load_and_prepare_data(csv_path)
 
     # 2. Load tokenizer correctly
-    dataset, _ = tokenize_dataset(dataset, tokenizer_name=model_path)
+    dataset, _ = tokenize_dataset(dataset, tokenizer_name=str(model_path))
     dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
 
     # 3. Load model and set device

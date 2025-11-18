@@ -2,12 +2,14 @@ from metaflow import FlowSpec, step, Parameter
 import sys
 from src.train import train_model  
 from pathlib import Path
+
+
 GERMAN_MODELS = [
     "dbmdz/bert-base-german-cased",
-    "bert-base-german-dbmdz-cased",
-    "deepset/gbert-base",
-    "oliverguhr/german-sentiment-bert",
+    "bert-base-german-cased",   
+    "deepset/gbert-base"
 ]
+
 
 
 class GermanModelFlow(FlowSpec):
@@ -21,6 +23,8 @@ class GermanModelFlow(FlowSpec):
     def start(self):
         print("🚀 Starting Metaflow multi-model pipeline")
 
+
+
         self.model_list = GERMAN_MODELS
         self.next(self.train_each_model, foreach="model_list")
 
@@ -30,7 +34,11 @@ class GermanModelFlow(FlowSpec):
         print(f"Training: {model_name}")
 
         
-        save_path = str(Path("models") / model_name.replace('/', '_'))
+        save_path = Path("flow_models") / model_name.replace('/', '_')
+        save_path.mkdir(parents=True, exist_ok=True)
+
+        save_path = str(save_path)  # convert to string after creating folder
+
 
         self.metrics = train_model(
             model_name=model_name,

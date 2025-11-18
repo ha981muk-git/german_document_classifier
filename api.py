@@ -31,7 +31,7 @@ async def read_index():
 
 # Load model once
 
-model_path = Path("models") / "dbmdz_bert-base-german-cased"
+model_path = Path("models") / "deepset_gbert-base"
 classifier = DocumentClassifier(str(model_path))
 
 

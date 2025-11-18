@@ -64,7 +64,7 @@ def build_objective(model_name):
             learning_rate=lr,
             train_batch=batch_size,
             eval_batch=batch_size,
-            epochs=1,
+            epochs=5,
             weight_decay=weight_decay,
             dropout=dropout
         )
@@ -80,8 +80,7 @@ def build_objective(model_name):
 # RUN HPO (clean + safe)
 # ================================
 if __name__ == "__main__":
-    print("🚀 Starting MULTI-MODEL Optuna HPO (Top-2 memory-saving mode)...")
-
+    print("🚀 Starting MULTI-MODEL Optuna HPO (Top-3 memory-saving mode)...")
     global_best_rows = []
 
     for model_name in MODELS:
@@ -101,12 +100,12 @@ if __name__ == "__main__":
         )
 
         objective = build_objective(model_name)
-        study.optimize(objective, n_trials=2)
+        study.optimize(objective, n_trials=5)
 
         # ============================
         # SAFE CLEANUP (simple & clean)
         # ============================
-        cleanup_folders(study, model_root, keep_top_n=1)
+        cleanup_folders(study, model_root, keep_top_n=2)
 
         # Save best hyperparameters
         best_params_path = os.path.join(model_root, "best_hyperparams.json")

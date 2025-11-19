@@ -100,7 +100,7 @@ if __name__ == "__main__":
         )
 
         objective = build_objective(model_name)
-        study.optimize(objective, n_trials=4)
+        study.optimize(objective, n_trials=5)
 
         # ============================
         # SAFE CLEANUP (simple & clean)

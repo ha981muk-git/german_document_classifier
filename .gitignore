@@ -8,3 +8,4 @@ src/__pycache__/
 models/
 .metaflow
 .readme.md
+.DS_Store

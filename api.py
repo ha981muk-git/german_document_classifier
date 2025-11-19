@@ -31,7 +31,11 @@ async def read_index():
 
 # Load model once
 
+
 model_path = Path("models") / "deepset_gbert-base"
+
+# Model from kaggle download for testing
+#model_path = Path("/Users/harsh/Downloads/kaggle/working/german_document_classifier/flow_models/bert-base-german-cased")
 classifier = DocumentClassifier(str(model_path))
 
 

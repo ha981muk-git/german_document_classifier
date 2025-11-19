@@ -44,7 +44,7 @@ class GermanModelFlow(FlowSpec):
             model_name=model_name,
             csv_path=self.csv_path,
             save_path=save_path,
-            epochs=1,
+            epochs=5,
             learning_rate=3e-5
         )
 

@@ -6,9 +6,13 @@ import optuna
 import pandas as pd
 from src.train import train_model
 from pathlib import Path
+from app.core.path import PROJECT_ROOT, APP_DIR
 
-CSV_PATH = "./data/data_processed/all_data.csv"
-STORAGE_URL = "sqlite:///optuna_studies.db"
+from pathlib import Path
+
+STORAGE_URL = f"sqlite:///{(PROJECT_ROOT / 'optuna_studies.db')}"
+CSV_PATH = APP_DIR / "data" / "data_processed" / "all_data.csv"
+
 
 MODELS = [
     "deepset/gbert-base",

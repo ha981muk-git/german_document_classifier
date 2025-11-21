@@ -2,7 +2,7 @@ from metaflow import FlowSpec, step, Parameter
 import sys
 from src.train import train_model  
 from pathlib import Path
-
+from app.core.path import APP_DIR
 
 GERMAN_MODELS = [
     "dbmdz/bert-base-german-cased",
@@ -10,13 +10,11 @@ GERMAN_MODELS = [
     "deepset/gbert-base"
 ]
 
-
-
 class GermanModelFlow(FlowSpec):
 
     csv_path = Parameter(
         "csv",
-        default="./data/data_processed/all_data.csv"
+        default=str(APP_DIR / "data" / "data_processed" / "all_data.csv")
     )
 
     @step

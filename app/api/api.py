@@ -3,11 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from typing import Optional
-from src.predict import DocumentClassifier
+from app.src.predict import DocumentClassifier
 import uuid
 import os
 import mimetypes
 from pathlib import Path
+from app.core.path import APP_DIR
 
 
 app = FastAPI()
@@ -21,23 +22,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
+# Static folder
+STATIC_DIR = APP_DIR / "static"
+  
 # Serve static frontend
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/")
 async def read_index():
-    return FileResponse('static/index.html')
-
+    return FileResponse(STATIC_DIR / "index.html")
 
 # Load model once
 
-
-model_path = Path("models") / "deepset_gbert-base"
+# Model path
+MODEL_PATH = APP_DIR / "models" / "deepset_gbert-base"
 
 # Model from kaggle download for testing
 #model_path = Path("/Users/harsh/Downloads/kaggle/working/german_document_classifier/flow_models/bert-base-german-cased")
-classifier = DocumentClassifier(str(model_path))
-
+classifier = DocumentClassifier(str(MODEL_PATH))
 
 @app.post("/predict")
 async def predict(

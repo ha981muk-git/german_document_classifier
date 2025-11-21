@@ -4,13 +4,14 @@ import sys
 from src.train import train_model
 from src.evaluate import evaluate_model
 from pathlib import Path
+from app.core.path import APP_DIR
 
 MODELS = [
     "deepset/gbert-base",
     "dbmdz/bert-base-german-cased",
 ]
 
-CSV_PATH = "data/data_processed/all_data.csv"
+CSV_PATH = APP_DIR / "data" / "data_processed" / "all_data.csv"
 
 
 if __name__ == "__main__":

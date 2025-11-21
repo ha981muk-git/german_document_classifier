@@ -4,11 +4,11 @@ import sys
 from src.train import train_model
 from src.evaluate import evaluate_model
 from pathlib import Path
-from app.core.path import APP_DIR
+from core.path import APP_DIR
 
 MODELS = [
     "deepset/gbert-base",
-    "dbmdz/bert-base-german-cased",
+#    "dbmdz/bert-base-german-cased",
 ]
 
 CSV_PATH = APP_DIR / "data" / "data_processed" / "all_data.csv"
@@ -29,7 +29,7 @@ if __name__ == "__main__":
             csv_path=CSV_PATH,
             save_path=save_path,
             learning_rate=3e-5,
-            epochs=5
+            epochs=1
         )
 
         print("\nTraining metrics:")

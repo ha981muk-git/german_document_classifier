@@ -77,9 +77,9 @@ python main.py
 
 The FastAPI service wraps the trained `DocumentClassifier` and exposes a single `/predict` endpoint that powers both the web UI and any programmatic client. It accepts either a `text` form field (for raw strings) or a `file` upload (for PDFs, images, or DOCs) and routes the request to the right inference path. Because the server also mounts the static frontend under `/`, you only need one process to serve both the UI and the API.
 
-Start the server:
+Start the server :
 ```bash
-uvicorn api:app --reload --port 8000
+uvicorn app.api.api:app --reload --port 8000
 ```
 
 Send free‑form text for classification:

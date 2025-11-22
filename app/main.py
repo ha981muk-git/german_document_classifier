@@ -4,7 +4,7 @@ import sys
 from src.train import train_model
 from src.evaluate import evaluate_model
 from pathlib import Path
-from core.path import APP_DIR
+from core.path import APP_DIR, PROJECT_ROOT
 
 MODELS = [
     "deepset/gbert-base",
@@ -21,7 +21,8 @@ if __name__ == "__main__":
         print(f"🚀 Training {model_name}")
 
  
-        save_path = str(Path("models") / model_name.replace('/', '_'))
+        save_path = str(PROJECT_ROOT / "models" / model_name.replace("/", "_"))
+
 
         # Train
         train_metrics = train_model(

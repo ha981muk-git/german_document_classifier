@@ -8,7 +8,7 @@ import uuid
 import os
 import mimetypes
 from pathlib import Path
-from app.core.path import APP_DIR
+from app.core.path import PROJECT_ROOT, APP_DIR
 
 
 app = FastAPI()
@@ -37,7 +37,7 @@ async def read_index():
 # Load model once
 
 # Model path
-MODEL_PATH = APP_DIR / "models" / "deepset_gbert-base"
+MODEL_PATH = PROJECT_ROOT / "models" / "deepset_gbert-base"
 
 # Model from kaggle download for testing
 #model_path = Path("/Users/harsh/Downloads/kaggle/working/german_document_classifier/flow_models/bert-base-german-cased")

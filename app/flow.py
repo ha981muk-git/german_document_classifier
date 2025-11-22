@@ -2,7 +2,7 @@ from metaflow import FlowSpec, step, Parameter
 import sys
 from src.train import train_model  
 from pathlib import Path
-from app.core.path import APP_DIR
+from app.core.path import APP_DIR, PROJECT_ROOT
 
 GERMAN_MODELS = [
     "dbmdz/bert-base-german-cased",
@@ -32,7 +32,9 @@ class GermanModelFlow(FlowSpec):
         print(f"Training: {model_name}")
 
         
-        save_path = Path("flow_models") / model_name.replace('/', '_')
+    
+        save_path = PROJECT_ROOT / "flow_models" / model_name.replace("/", "_")
+
         save_path.mkdir(parents=True, exist_ok=True)
 
         save_path = str(save_path)  # convert to string after creating folder

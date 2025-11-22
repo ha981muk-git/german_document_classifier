@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
         print(f"\n🔍 Running HPO for model: {model_name}")
 
-        model_root = str(Path("models") / model_name.replace('/', '_') / "hpo")
+        model_root = str(PROJECT_ROOT / "models" / model_name.replace('/', '_') / "hpo")
         os.makedirs(model_root, exist_ok=True)
 
         study_name = f"hpo_{model_name.replace('/', '_')}_{int(time.time())}"

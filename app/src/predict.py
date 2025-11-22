@@ -12,7 +12,7 @@ import docx  # for DOCX files
 from typing import Dict, Any
 from pathlib import Path
 from .utils import load_label_encoder
-from app.core.path import APP_DIR
+from app.core.path import PROJECT_ROOT
 
 # Device detection
 device = (
@@ -22,7 +22,7 @@ device = (
 )
 
 # Get APP_DIR (one level up from src/)
-PREDICTION_MODEL = APP_DIR / "models" / "dbmdz_bert-base-german-cased"
+PREDICTION_MODEL = PROJECT_ROOT / "models" / "dbmdz_bert-base-german-cased"
 
 
 class DocumentClassifier:

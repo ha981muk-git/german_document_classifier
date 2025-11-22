@@ -10,3 +10,4 @@ app/models/
 app/.metaflow
 .readme.md
 .DS_Store
+sandbox/

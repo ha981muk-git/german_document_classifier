@@ -34,20 +34,48 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 async def read_index():
     return FileResponse(STATIC_DIR / "index.html")
 
-# Load model once
+# Load models 
+
+# Load available models automatically
+MODEL_DIR = PROJECT_ROOT / "models"
+
+def get_available_models():
+    return [d.name for d in MODEL_DIR.iterdir() if d.is_dir()]
 
 # Model path
-MODEL_PATH = PROJECT_ROOT / "models" / "deepset_gbert-base"
+DEFAULT_MODEL = PROJECT_ROOT / "models" / "deepset_gbert-base"
+
+# Cache for loaded models
+CLASSIFIERS = {}
+
+def get_classifier(model_name: str):
+    if model_name not in CLASSIFIERS:
+        model_path = MODEL_DIR / model_name
+        CLASSIFIERS[model_name] = DocumentClassifier(str(model_path))
+    return CLASSIFIERS[model_name]
+
+
 
 # Model from kaggle download for testing
 #model_path = Path("/Users/harsh/Downloads/kaggle/working/german_document_classifier/flow_models/bert-base-german-cased")
-classifier = DocumentClassifier(str(MODEL_PATH))
+#classifier = DocumentClassifier(str(DEFAULT_MODEL))
+
+
+@app.get("/models")
+async def list_models():
+    return {
+        "default": DEFAULT_MODEL,
+        "models": get_available_models()
+    }
+
 
 @app.post("/predict")
 async def predict(
+    model_name: str = Form(DEFAULT_MODEL),
     text: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None)
-):
+):  
+    classifier = get_classifier(model_name)
     # -----------------------
     # CASE 1 — File uploaded
     # -----------------------

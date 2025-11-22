@@ -8,7 +8,7 @@ from core.path import APP_DIR, PROJECT_ROOT
 
 MODELS = [
     "deepset/gbert-base",
-#    "dbmdz/bert-base-german-cased",
+    "dbmdz/bert-base-german-cased",
 ]
 
 CSV_PATH = APP_DIR / "data" / "data_processed" / "all_data.csv"

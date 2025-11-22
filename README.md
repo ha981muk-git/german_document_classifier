@@ -12,35 +12,34 @@ All installation steps, architecture explanations, and usage instructions from t
 
 ## **1.1 Running in Google Colab**
 
+<!--
 If the project is stored in Google Drive:
 
 ```python
 from google.colab import drive
 drive.mount('/content/drive')
 ```
+-->
 
-After mounting, your project will appear under:
+
+Clone the Repository in using cell in one Cell in Colab:
 
 ```
-/content/drive/MyDrive/PATH_TO_PROJECT/german_document_classifier/
+!git clone https://github.com/ha981muk-git/german_document_classifier.git
+%cd german_document_classifier
 ```
 
-### **Install dependencies**
+### **Install dependencies(Optinal) Most of thing are already in Colab**
 
 ```bash
-!pip install -r "/content/drive/MyDrive/PATH_TO_PROJECT/german_document_classifier/requirements.txt"
+!pip install -r "requirements.txt"
 ```
 
-### **Change to the project folder**
-
-```bash
-%cd /content/drive/MyDrive/PATH_TO_PROJECT/german_document_classifier/
-```
 
 ### **Fine-Tune BERT MODEL**
 
 ```bash
-!python /content/drive/MyDrive/PATH_TO_PROJECT/german_document_classifier/main.py
+!python app/main.py
 ```
 
 ---
@@ -66,12 +65,12 @@ conda activate doc-classifier-env
 ### **2.3 Synthetic Data Generation**
 
 ```bash
-python tests/doc_generator.py
+python app/sampler/doc_generator.py
 ```
 ## **2.4 Training the BERT Models**
 
 ```bash
-python main.py
+python app/main.py
 ```
 ## **2.5 FastAPI Web Server**
 
@@ -92,7 +91,7 @@ curl -X POST http://127.0.0.1:8000/predict \
 Send pdf for classification:
 ```bash
 curl -X POST http://127.0.0.1:8000/predict \
-     -F "file=@data/data_raw/contracts/01_Vertrag.pdf;type=application/pdf"
+     -F "file=@app/data/data_raw/contracts/01_Vertrag.pdf;type=application/pdf"
 ```
 ### Open the UI:
 👉 http://localhost:8000
@@ -108,7 +107,7 @@ curl -X POST http://127.0.0.1:8000/predict \
 ### **2.6 Hyperparameter Searching**
 
 ```bash
-python hyperparamsearch.py
+python app/hyperparamsearch.py
 ```
 
 ## **3. 📁 Project Structure**
@@ -211,7 +210,7 @@ This separation of concerns improves the reproducibility and maintainability of 
 
 ## **A.3 Data Processing Layer**
 
-**Module:** `src/data_loader.py`
+**Module:** `app/src/data_loader.py`
 
 Responsibilities:
 
@@ -229,7 +228,7 @@ This design ensures consistency between training, evaluation, and inference.
 
 ## **A.4 Model Training Layer**
 
-**Module:** `src/train.py`
+**Module:** `app/src/train.py`
 
 The training subsystem implements:
 
@@ -248,7 +247,7 @@ All training parameters are stored in a `training_config.json` file to ensure fu
 
 ## **A.5 Evaluation Layer**
 
-**Module:** `src/evaluate.py`
+**Module:** `app/src/evaluate.py`
 
 The evaluation pipeline:
 
@@ -262,7 +261,7 @@ The evaluation pipeline:
 
 ## **A.6 Hyperparameter Optimization**
 
-**Module:** `hyperparamsearch.py`
+**Module:** `app/hyperparamsearch.py`
 
 Hyperparameter optimization is based on **Optuna**.
 The implementation includes:
@@ -287,7 +286,7 @@ This subsystem ensures efficient exploration of model configurations while minim
 
 ## **A.7 Workflow Automation**
 
-**Module:** `flow.py`
+**Module:** `app/flow.py`
 
 The system incorporates an automated training pipeline using **Metaflow**, featuring:
 
@@ -306,7 +305,7 @@ start → train_each_model (foreach) → join → end
 
 ## **A.8 Inference Layer (DocumentClassifier)**
 
-**Module:** `src/predict.py`
+**Module:** `app/src/predict.py`
 
 The inference engine provides a unified abstraction for document classification.
 It supports multiple input formats:
@@ -333,7 +332,7 @@ The module loads the pretrained model and the corresponding label encoder to pro
 
 ## **A.9 FastAPI Service Layer**
 
-**Module:** `api.py`
+**Module:** `app/api/api.py`
 
 The web service exposes the following endpoints:
 
@@ -345,7 +344,7 @@ The web service exposes the following endpoints:
 * `GET /`
 
   * Serves the frontend interface
-* `/static/*`
+* `app/static/*`
 
   * Hosts all frontend assets
 

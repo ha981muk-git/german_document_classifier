@@ -6,37 +6,34 @@
 This document provides a clean, professional structure for developers working on the **German Document Classifier** project.
 All installation steps, architecture explanations, and usage instructions from the original text are preserved and reorganized.
 
+
+
 ---
 
 # **1. 🚀 Getting Started**
 
 ## **1.1 Running in Google Colab**
 
-<!--
-If the project is stored in Google Drive:
+### **Clone the Repository**
 
-```python
-from google.colab import drive
-drive.mount('/content/drive')
-```
--->
+Run the following commands in a Colab cell to clone the project and navigate into the directory:
 
-
-Clone the Repository in using cell in one Cell in Colab:
-
-```
+```bash
 !git clone https://github.com/ha981muk-git/german_document_classifier.git
 %cd german_document_classifier
 ```
 
-### **Install dependencies(Optinal) Most of thing are already in Colab**
+### **Install Dependencies (Optional)**
+
+Most required packages are already available in Google Colab, but if needed, you can install the remaining ones:
 
 ```bash
-!pip install -r "requirements.txt"
+!pip install -r requirements.txt
 ```
 
+### **Fine-Tune the BERT Model**
 
-### **Fine-Tune BERT MODEL**
+Execute the main script to start the fine-tuning process:
 
 ```bash
 !python app/main.py

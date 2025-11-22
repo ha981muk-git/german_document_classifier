@@ -112,27 +112,50 @@ python app/hyperparamsearch.py
 ```text
 german_document_classifier/
 │
-├── src/
-│   ├── train.py              # Model training (HuggingFace Trainer)
-│   ├── evaluate.py           # Evaluation pipeline
-│   ├── data_loader.py        # Data loading, preprocessing, tokenization
-│   ├── predict.py            # DocumentClassifier (OCR + inference logic)
-│   ├── utils.py              # Utility and helper functions
+├── config.yaml
+├── environment.yaml
+├── requirements.txt
+├── optuna_studies.db
 │
-├── notebooks/                # jupyternotebook for various purpose
-├── models/                   # Saved models, tokenizers, configs
-├── static/                   # Frontend files (served by FastAPI)
-│   ├── index.html            # html page
-│   ├── style.css
-├── data/                     # Raw and processed datasets (CSV)
+├── app/
+│   ├── main.py
+│   ├── flow.py
+│   ├── hyperparamsearch.py
+│   │
+│   ├── api/
+│   │   └── api.py
+│   │
+│   ├── core/
+│   │   └── path.py
+│   │
+│   ├── data/
+│   │   └── (data files not shown)
+│   │
+│   ├── sampler/
+│   │   ├── doc_generator.py
+│   │   └── make_synthetic_data.py
+│   │
+│   ├── src/
+│   │   ├── data_loader.py
+│   │   ├── train.py
+│   │   ├── evaluate.py
+│   │   ├── predict.py
+│   │   └── utils.py
+│   │
+│   ├── static/
+│   │   ├── index.html
+│   │   └── style.css
+│   │
+│   └── notebooks/
+│       ├── 01_data_exploration.ipynb
+│       ├── 02_model_training.ipynb
+│       ├── 03_evaluation.ipynb
+│       ├── 04_data_extraction.ipynb
+│       ├── colab.ipynb
+│       └── kaggle.ipynb
 │
-├── environment.yaml          # packages and dependencies   
-├── main.py                   # Training + evaluation entry script
-├── hyperparamsearch.py       # Optuna hyperparameter optimization
-├── flow.py                   # Automated multi-model training pipeline
-├── api.py                    # FastAPI backend (file upload + prediction)
-│
-└── README.md                 # Project documentation
+└── README.md
+
 ```
 
 

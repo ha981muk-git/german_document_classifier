@@ -8,7 +8,7 @@ import uuid
 import os
 import mimetypes
 from pathlib import Path
-from app.core.path import PROJECT_ROOT, APP_DIR
+from core.paths import PROJECT_ROOT, APP_DIR
 
 
 app = FastAPI()

@@ -4,7 +4,7 @@ import sys
 from src.train import train_model
 from src.evaluate import evaluate_model
 from pathlib import Path
-from core.path import APP_DIR, PROJECT_ROOT
+from core.paths import APP_DIR, PROJECT_ROOT
 
 MODELS = [
     "deepset/gbert-base",

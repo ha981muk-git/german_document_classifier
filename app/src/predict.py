@@ -12,7 +12,7 @@ import docx  # for DOCX files
 from typing import Dict, Any
 from pathlib import Path
 from .utils import load_label_encoder
-from app.core.path import PROJECT_ROOT
+from core.paths import PROJECT_ROOT
 
 # Device detection
 device = (

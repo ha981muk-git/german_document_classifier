@@ -2,7 +2,7 @@ from metaflow import FlowSpec, step, Parameter
 import sys
 from src.train import train_model  
 from pathlib import Path
-from app.core.path import APP_DIR, PROJECT_ROOT
+from core.paths import APP_DIR, PROJECT_ROOT
 
 GERMAN_MODELS = [
     "dbmdz/bert-base-german-cased",

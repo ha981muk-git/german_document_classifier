@@ -6,7 +6,7 @@ import optuna
 import pandas as pd
 from src.train import train_model
 from pathlib import Path
-from app.core.path import PROJECT_ROOT, APP_DIR
+from core.paths import PROJECT_ROOT, APP_DIR
 
 from pathlib import Path
 

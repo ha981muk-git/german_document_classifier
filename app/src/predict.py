@@ -11,7 +11,7 @@ import mimetypes
 import docx  # for DOCX files
 from typing import Dict, Any
 from pathlib import Path
-from .utils import load_label_encoder
+from .utils import clean_text, load_label_encoder
 from core.paths import PROJECT_ROOT
 
 # Device detection
@@ -42,11 +42,7 @@ class DocumentClassifier:
     # CLEAN TEXT (preprocessing)
     # -----------------------
     def preprocess_text(self, text: str) -> str:
-        text = text.replace("\n", " ")
-        text = re.sub(r"<[^>]+>", "", text)
-        text = re.sub(r"\s+", " ", text)
-        text = re.sub(r"[^a-zA-Z0-9äöüÄÖÜß$€%.,\s-]", " ", text)
-        return text.lower().strip()
+        return clean_text(text)
 
     def page_contains_image(self, page):
         """Detect whether a PDF page contains image blocks (PyMuPDF type 1)."""

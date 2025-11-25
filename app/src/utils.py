@@ -1,8 +1,19 @@
 # utils.py
+import re
 from pathlib import Path
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 import json
+
+# ---------------------------
+# CLEAN TEXT (shared)
+# ---------------------------
+def clean_text(text: str) -> str:
+    text = text.replace("\n", " ")
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"[^a-zA-Z0-9äöüÄÖÜß$€%.,\s-]", " ", text)
+    text = re.sub(r"\s+", " ", text)
+    return text.lower().strip()
 
 
 def save_label_encoder(label_encoder: LabelEncoder, output_path: str) -> None:
@@ -25,3 +36,4 @@ def save_training_config(config: dict, model_path: str) -> None:
     config_path = Path(model_path) / "training_config.json"
     with open(config_path, "w") as f:
         json.dump(config, f, indent=4)
+

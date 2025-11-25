@@ -168,3 +168,43 @@ print(prediction)
 
 
 """
+
+"""
+def tfidf_logreg_baseline(csv_path: str) -> Dict[str, float]:
+
+    # Loads the saved baseline model (trained earlier) and evaluates
+    # it on the given CSV file. This is used by compare_models().
+
+    model = TfidfLogRegModel("models/baseline_tfidf")
+
+    df = pd.read_csv(csv_path)
+    texts = df["text"].astype(str)
+    labels = df["label"].astype(str)
+
+    preds = []
+    for t in texts:
+        pred = model.predict(t)
+        preds.append(pred["label"])
+
+    acc = accuracy_score(labels, preds)
+    p, r, f1, _ = precision_recall_fscore_support(
+        labels, preds, average="weighted", zero_division=0
+    )
+
+    return {
+        "accuracy": float(acc),
+        "precision": float(p),
+        "recall": float(r),
+        "f1": float(f1),
+    }
+
+    model = TfidfLogRegModel("models/baseline_tfidf")
+    prediction = model.predict("Dies ist ein Testtext für die Klassifikation.")
+    print(prediction)
+    # Before running comparisons, you must train your baseline once:
+    train_tfidf_logreg("data/train.csv", "models/baseline_tfidf")
+    # comparison works like this:
+    compare_models("data/test.csv", transformer_eval_fn)
+
+
+"""

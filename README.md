@@ -126,7 +126,7 @@ german_document_classifier/
 │   │   └── api.py
 │   │
 │   ├── core/
-│   │   └── path.py
+│   │   └── paths.py
 │   │
 │   ├── data/
 │   │   └── (data files not shown)

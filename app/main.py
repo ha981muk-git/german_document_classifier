@@ -30,7 +30,7 @@ if __name__ == "__main__":
             csv_path=CSV_PATH,
             save_path=save_path,
             learning_rate=3e-5,
-            epochs=1
+            epochs=5
         )
 
         print("\nTraining metrics:")

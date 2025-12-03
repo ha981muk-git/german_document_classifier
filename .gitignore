@@ -1,7 +1,7 @@
 app/flow_models/
 optuna_studies.db
-app/data/data_raw
-app/data/data_synthetic
+app/data/raw
+app/data/synthetic
 app/models*
 __pycache__/
 app/__pycache__/

@@ -5,6 +5,12 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 import json
 
+
+from PIL import Image
+import fitz  # PyMuPDF
+import pytesseract
+import io
+
 # ---------------------------
 # CLEAN TEXT (shared)
 # ---------------------------
@@ -14,6 +20,49 @@ def clean_text(text: str) -> str:
     text = re.sub(r"[^a-zA-Z0-9äöüÄÖÜß$€%.,\s-]", " ", text)
     text = re.sub(r"\s+", " ", text)
     return text.lower().strip()
+
+# -----------------------
+# EXTRACT TEXT FROM PDF
+# -----------------------
+import fitz  # PyMuPDF
+import pytesseract
+import io
+from PIL import Image
+
+def extract_pdf(pdf_path: str) -> str:
+    """
+    Extracts text from a PDF.
+    Priority:
+    1. Direct text extraction (fast, accurate).
+    2. OCR fallback if the page is a scanned image (slow).
+    """
+    full_text = ""
+    
+    try:
+        with fitz.open(pdf_path) as doc:
+            for page in doc:
+                # 1. Try to get digital text first
+                page_text = page.get_text()
+                
+                # If meaningful text exists, use it
+                if page_text.strip():
+                    full_text += page_text
+                
+                # 2. If no text found (scanned document), use OCR
+                else:
+                    # Render page as an image
+                    pix = page.get_pixmap(dpi=300)
+                    img = Image.open(io.BytesIO(pix.tobytes()))
+                    
+                    # Perform OCR (assuming German based on your previous context)
+                    # If mixed, use lang='deu+eng'
+                    ocr_text = pytesseract.image_to_string(img, lang='deu')
+                    full_text += ocr_text
+
+    except Exception as e:
+        print(f"Error reading {pdf_path}: {e}")
+
+    return full_text
 
 
 def save_label_encoder(label_encoder: LabelEncoder, output_path: str) -> None:
@@ -36,4 +85,6 @@ def save_training_config(config: dict, model_path: str) -> None:
     config_path = Path(model_path) / "training_config.json"
     with open(config_path, "w") as f:
         json.dump(config, f, indent=4)
+
+
 

@@ -11,7 +11,7 @@ import mimetypes
 import docx  # for DOCX files
 from typing import Dict, Any
 from pathlib import Path
-from .utils import clean_text, load_label_encoder
+from .utils import clean_text, extract_pdf, load_label_encoder
 from app.core.paths import PROJECT_ROOT
 
 # Device detection
@@ -67,28 +67,7 @@ class DocumentClassifier:
     # EXTRACT TEXT FROM PDF
     # -----------------------
     def extract_text_from_pdf(self, pdf_path: str) -> str:
-        text = ""
-        # FIX 4) use context manager to avoid resource leaks
-        with fitz.open(pdf_path) as doc:
-            for page in doc:
-
-                # If page contains images → OCR fallback
-                if self.page_contains_image(page):
-                    pix = page.get_pixmap(dpi=300)
-                    img = Image.open(io.BytesIO(pix.tobytes()))
-                    text += pytesseract.image_to_string(img, lang="deu")
-                    continue
-
-                # If page has real selectable text
-                page_text = page.get_text()
-                if page_text.strip():
-                    text += page_text
-                else:
-                    # No detectable text → fallback OCR
-                    pix = page.get_pixmap(dpi=300)
-                    img = Image.open(io.BytesIO(pix.tobytes()))
-                    text += pytesseract.image_to_string(img, lang="deu")
-        return text
+        return extract_pdf(pdf_path)
 
     # -----------------------
     # EXTRACT TEXT FROM IMAGE (OCR)

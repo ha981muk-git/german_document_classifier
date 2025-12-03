@@ -5,11 +5,10 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 import json
 
-
-from PIL import Image
 import fitz  # PyMuPDF
 import pytesseract
 import io
+from PIL import Image
 
 # ---------------------------
 # CLEAN TEXT (shared)
@@ -24,10 +23,7 @@ def clean_text(text: str) -> str:
 # -----------------------
 # EXTRACT TEXT FROM PDF
 # -----------------------
-import fitz  # PyMuPDF
-import pytesseract
-import io
-from PIL import Image
+
 
 def extract_pdf(pdf_path: str) -> str:
     """

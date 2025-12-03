@@ -2,10 +2,10 @@ import sys
 from pathlib import Path
 import pandas as pd
 
-from core.paths import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, SYNTHETIC_DIR
-from src.prepare_data import process_dataset
-from src.train import train_model
-from src.evaluate import evaluate_model
+from app.core.paths import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, SYNTHETIC_DIR
+from app.src.prepare_data import process_dataset
+from app.src.train import train_model
+from app.src.evaluate import evaluate_model
 import argparse
 
 # -----------------------------

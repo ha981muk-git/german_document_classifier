@@ -34,6 +34,11 @@ class Config:
     LEARNING_RATE = 3e-5
     EPOCHS = 10
 
+    # Synthetic data generation parameters
+    SYNTHETIC_PER_CATEGORY_V0 = 200
+    SYNTHETIC_PER_CATEGORY_V1 = 100
+    SYNTHETIC_OVERWRITE = False
+
 
 # -----------------------------
 # Helpers
@@ -90,13 +95,13 @@ def main() -> None:
     if args.generate or args.all:
         print("GENERATING SYNTHETIC DATA I ...")
         save_all_synthetic_as_text_files(
-            per_category=200,
+            per_category=Config.SYNTHETIC_PER_CATEGORY_V0,
             output_dir=str(SYNTHETIC_DIR),
-            overwrite=False
+            overwrite=Config.SYNTHETIC_OVERWRITE
         )
         print("GENERATING SYNTHETIC DATA II ...")
-        generator = SyntheticDocumentGenerator(per_category=50, output_dir=str(SYNTHETIC_DIR))
-        generator.generate_documents(overwrite=False)
+        generator = SyntheticDocumentGenerator(per_category=Config.SYNTHETIC_PER_CATEGORY_V1, output_dir=str(SYNTHETIC_DIR))
+        generator.generate_documents(overwrite=Config.SYNTHETIC_OVERWRITE)
 
     if args.prepare or args.all:
         print("PREPARING DATASETS")

@@ -1,11 +1,12 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from typing import Optional
 from app.src.predict import DocumentClassifier
 import uuid
-import os
+import tempfile
+import shutil
 import mimetypes
 from pathlib import Path
 from app.core.paths import PROJECT_ROOT, APP_DIR
@@ -39,21 +40,26 @@ async def read_index():
 # Load available models automatically
 MODEL_DIR = PROJECT_ROOT / "models"
 
-def get_available_models():
+def get_available_models() -> list[str]:
     return [d.name for d in MODEL_DIR.iterdir() if d.is_dir()]
 
-# Model path
-DEFAULT_MODEL = PROJECT_ROOT / "models" / "deepset_gbert-base"
+AVAILABLE_MODELS = get_available_models()
+DEFAULT_MODEL_NAME = "deepset_gbert-base" if "deepset_gbert-base" in AVAILABLE_MODELS else (AVAILABLE_MODELS[0] if AVAILABLE_MODELS else None)
 
 # Cache for loaded models
 CLASSIFIERS = {}
 
 def get_classifier(model_name: str):
+    if model_name not in AVAILABLE_MODELS:
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Model '{model_name}' not found. Available models: {AVAILABLE_MODELS}"
+        )
+
     if model_name not in CLASSIFIERS:
         model_path = MODEL_DIR / model_name
         CLASSIFIERS[model_name] = DocumentClassifier(str(model_path))
     return CLASSIFIERS[model_name]
-
 
 
 # Model from kaggle download for testing
@@ -64,36 +70,34 @@ def get_classifier(model_name: str):
 @app.get("/models")
 async def list_models():
     return {
-        "default": DEFAULT_MODEL,
-        "models": get_available_models()
+        "default_model": DEFAULT_MODEL_NAME,
+        "available_models": AVAILABLE_MODELS
     }
 
 
 @app.post("/predict")
 async def predict(
-    model_name: str = Form(DEFAULT_MODEL),
+    model_name: str = Form(DEFAULT_MODEL_NAME),
     text: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None)
 ):  
+    if not model_name:
+        raise HTTPException(status_code=400, detail="No models available to process request.")
+
     classifier = get_classifier(model_name)
     # -----------------------
     # CASE 1 — File uploaded
     # -----------------------
     if file:
-        # Save temporarily
-        temp_name = f"temp_{uuid.uuid4()}_{file.filename}"
-        with open(temp_name, "wb") as f:
-            f.write(await file.read())
-
+        # Use a secure temporary directory
+        temp_dir = tempfile.mkdtemp()
         try:
-            # Use universal extractor
+            temp_name = Path(temp_dir) / file.filename
+            with open(temp_name, "wb") as f:
+                shutil.copyfileobj(file.file, f)
             result = classifier.predict_file(temp_name)
-        except ValueError as e:
-            os.remove(temp_name)
-            return {"error": str(e)}
         finally:
-            if os.path.exists(temp_name):
-                os.remove(temp_name)
+            shutil.rmtree(temp_dir) # Clean up the directory and its contents
 
         mime_type, _ = mimetypes.guess_type(file.filename)
 
@@ -114,4 +118,4 @@ async def predict(
     # -----------------------
     # CASE 3 — Nothing provided
     # -----------------------
-    return {"error": "Provide text or upload a file"}
+    raise HTTPException(status_code=400, detail="Provide 'text' or upload a 'file'.")

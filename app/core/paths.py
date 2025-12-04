@@ -1,20 +1,30 @@
-# Project root directory
 from pathlib import Path
 import sys
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+# --------------------------------------------------------
+# Project Root
+# --------------------------------------------------------
 
-# Add project root for imports
-sys.path.append(str(PROJECT_ROOT))
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+# Make project importable (optional but safe)
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(PROJECT_ROOT))
+
+# --------------------------------------------------------
+# Directory Structure
+# --------------------------------------------------------
 
 APP_DIR = PROJECT_ROOT / "app"
-
 DATA_DIR = APP_DIR / "data"
 
 RAW_DIR = DATA_DIR / "raw"
 SYNTHETIC_DIR = DATA_DIR / "synthetic"
-
-# Output directory (Where the CSV will go)
 PROCESSED_DIR = DATA_DIR / "processed"
+
+# Automatically create directories if missing
+for d in [RAW_DIR, SYNTHETIC_DIR, PROCESSED_DIR]:
+    d.mkdir(parents=True, exist_ok=True)
+
 
 

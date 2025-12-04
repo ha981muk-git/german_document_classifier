@@ -3,7 +3,8 @@ from pathlib import Path
 from typing import Dict, List
 import pandas as pd
 
-from app.core.paths import LABEL_MAP, PROCESSED_DIR, RAW_DIR, SYNTHETIC_DIR
+
+from app.core.paths import  PROCESSED_DIR, RAW_DIR, SYNTHETIC_DIR
 from app.src.utils import extract_pdf, clean_text
 
 

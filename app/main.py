@@ -32,7 +32,7 @@ class Config:
         "dbmdz/bert-base-german-cased",
     ]
     LEARNING_RATE = 3e-5
-    EPOCHS = 10
+    EPOCHS = 1
 
 
 # -----------------------------
@@ -94,7 +94,7 @@ def main() -> None:
             output_dir=str(SYNTHETIC_DIR),
             overwrite=False
         )
-        generator = SyntheticDocumentGenerator(per_category=100, output_dir="data/synthetic/")
+        generator = SyntheticDocumentGenerator(per_category=100, output_dir=str(SYNTHETIC_DIR))
         generator.generate_documents(overwrite=False)
 
     if args.prepare or args.all:

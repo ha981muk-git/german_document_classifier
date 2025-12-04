@@ -1,4 +1,4 @@
-import os
+import sys
 from pathlib import Path
 from typing import Dict, List
 import pandas as pd
@@ -16,13 +16,13 @@ def read_text_file(path: Path) -> str:
         except UnicodeDecodeError:
             continue
         except Exception as e:
-            print(f"[ERROR] Cannot read {path}: {e}")
+            print(f"[ERROR] Cannot read {path}: {e}", file=sys.stderr)
             return ""
-    print(f"[WARN] Could not decode text file: {path}")
+    print(f"[WARN] Could not decode text file: {path}", file=sys.stderr)
     return ""
 
 
-def process_dataset(input_dir: str, output_file: str, label_map: Dict[str, int]) -> pd.DataFrame | None:
+def process_dataset(input_dir: str, output_file: str, label_map: Dict[str, str]) -> pd.DataFrame | None:
     """Walk through folders, extract PDF/TXT text, clean it, assign labels, and export CSV."""
     input_path = Path(input_dir)
     output_path = Path(output_file)
@@ -36,7 +36,7 @@ def process_dataset(input_dir: str, output_file: str, label_map: Dict[str, int])
         folder_path = input_path / class_folder
 
         if not folder_path.is_dir():
-            print(f"[WARN] Missing directory: {folder_path}")
+            print(f"[WARN] Missing directory: {folder_path}", file=sys.stderr)
             continue
 
         print(f"→ Processing: {class_folder}  (label={label})")
@@ -60,7 +60,7 @@ def process_dataset(input_dir: str, output_file: str, label_map: Dict[str, int])
                 print(f"   Processed {idx}/{total_files} files...")
 
     if not records:
-        print(f"[EMPTY] No documents extracted from {input_dir}")
+        print(f"[EMPTY] No documents extracted from {input_dir}", file=sys.stderr)
         return None
 
     df = pd.DataFrame(records)
@@ -72,5 +72,3 @@ def process_dataset(input_dir: str, output_file: str, label_map: Dict[str, int])
     print(df["label"].value_counts())
 
     return df
-
-

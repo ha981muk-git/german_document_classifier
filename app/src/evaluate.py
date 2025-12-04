@@ -30,7 +30,7 @@ def evaluate_model(model_path: str, csv_path: str) -> Dict[str, float]:
     model.eval()
 
     # 4. Batch loader
-    test_loader = DataLoader(dataset["test"], batch_size=16)
+    test_loader = DataLoader(dataset["test"], batch_size=32) # Larger batch size for eval is fine
 
     all_preds = []
     all_labels = []
@@ -52,6 +52,15 @@ def evaluate_model(model_path: str, csv_path: str) -> Dict[str, float]:
     all_preds = np.array(all_preds)
     all_labels = np.array(all_labels)
 
-    accuracy = float((all_preds == all_labels).mean())
+    # Calculate comprehensive metrics
+    p, r, f1, _ = precision_recall_fscore_support(
+        all_labels, all_preds, average="weighted", zero_division=0
+    )
+    accuracy = (all_preds == all_labels).mean()
 
-    return {"accuracy": accuracy}
+    return {
+        "accuracy": float(accuracy),
+        "precision": float(p),
+        "recall": float(r),
+        "f1": float(f1),
+    }

@@ -31,7 +31,15 @@ def load_and_prepare_data(csv_path: str,
     missing_columns = required_columns - set(df.columns)
     if missing_columns:
         raise ValueError(f"Missing required columns: {missing_columns}")
+    
+    # CLEAN NANs
     df = df[["text", "label"]].dropna()
+
+    # Prevent Data Leakage by removing duplicates
+    df = df.drop_duplicates(subset=["text"])
+
+    # Prevent crash in train_test_split if a class has only 1 item
+    df = df.groupby('label').filter(lambda x: len(x) >= 3)
 
     label_encoder = LabelEncoder()
     df["label"] = label_encoder.fit_transform(df["label"])

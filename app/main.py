@@ -95,7 +95,7 @@ def main() -> None:
             overwrite=False
         )
         print("GENERATING SYNTHETIC DATA II ...")
-        generator = SyntheticDocumentGenerator(per_category=100, output_dir=str(SYNTHETIC_DIR))
+        generator = SyntheticDocumentGenerator(per_category=50, output_dir=str(SYNTHETIC_DIR))
         generator.generate_documents(overwrite=False)
 
     if args.prepare or args.all:

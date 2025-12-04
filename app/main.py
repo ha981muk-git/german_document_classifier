@@ -94,7 +94,7 @@ def main():
             csv_path=csv_path,
             save_path=save_path,
             learning_rate=3e-5,
-            epochs=1
+            epochs=10
         )
 
         print("\nTraining metrics:")

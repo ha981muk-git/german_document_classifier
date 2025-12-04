@@ -1,4 +1,3 @@
-!app/data/processed/all_data.csv
 app/flow_models/
 optuna_studies.db
 app/data/raw

@@ -28,7 +28,11 @@ def compute_metrics(eval_pred):
         "f1": float(f1),
     }
 
-def get_optimal_batch_sizes(device, user_train_batch=None, user_eval_batch=None, user_gradient_accumulation=None):
+def get_sensible_batch_sizes(device, user_train_batch=None, user_eval_batch=None, user_gradient_accumulation=None):
+    """
+    Selects sensible default batch sizes and FP16 settings based on the device
+    if the user has not provided them.
+    """
     if user_train_batch is None:
         if device.type == "cuda":
             return 4, 8, 2, True
@@ -69,7 +73,7 @@ def train_model(
     save_path.mkdir(parents=True, exist_ok=True)
 
     # ===== GET OPTIMAL BATCH SIZES & FP16 SETTING =====
-    train_batch_size, eval_batch_size, grad_accum, use_fp16 = get_optimal_batch_sizes(
+    train_batch_size, eval_batch_size, grad_accum, use_fp16 = get_sensible_batch_sizes(
         device,
         user_train_batch=train_batch,
         user_eval_batch=eval_batch,
@@ -168,6 +172,7 @@ def train_model(
 
     # Evaluate and return test metrics
     return trainer.evaluate(eval_dataset=dataset["test"])  
+
     """
     Deefault return block: --- IGNORE --
     trainer.train()

@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 import pandas as pd
+from collections import defaultdict
 
 from core.paths import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, SYNTHETIC_DIR
 from src.prepare_data import process_dataset
@@ -35,6 +36,9 @@ class Config:
 
 def combine_csv_files(processed_dir: Path) -> Path:
     """Combine all CSV files in PROCESSED_DIR into all_data.csv."""
+    if not processed_dir.exists():
+        raise FileNotFoundError(f"Processed directory not found: {processed_dir}")
+
     csv_files = list(processed_dir.glob("*.csv"))
 
     if not csv_files:
@@ -76,14 +80,14 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.prepare:
-        print("Preparing datasets...")
+        print("Preparing datasets from files ...")
         prepare_datasets()
 
 
     processed_dir = Path(PROCESSED_DIR)
     csv_path = combine_csv_files(processed_dir)
 
-    results = {}
+    results = defaultdict(dict)
 
     for model_name in Config.MODELS_TO_TRAIN:
         print(f"\n🚀 Training {model_name}")
@@ -98,21 +102,23 @@ def main() -> None:
             epochs=Config.EPOCHS
         )
 
-        print("\nTraining metrics:")
+        print(f"\nTraining metrics for {model_name}:")
         print(train_metrics)
+        results[model_name]["train"] = train_metrics
 
-        print("\n🔍 Evaluating on test set...")
+        print(f"\n🔍 Evaluating {model_name} on test set...")
         eval_metrics = evaluate_model(save_path, str(csv_path))
 
-        print("Evaluation metrics:")
+        print(f"Evaluation metrics for {model_name}:")
         print(eval_metrics)
+        results[model_name]["eval"] = eval_metrics
 
-        results[model_name] = {"train": train_metrics, "eval": eval_metrics}
-
-    print("\n📊 Final model results:")
+    print("\n📊 Final model results summary:")
     for model, metrics in results.items():
-        print(f"\nMODEL: {model}")
-        print(metrics)
+        print(f"\n--- MODEL: {model} ---")
+        print("  Training Metrics:", metrics.get("train", "N/A"))
+        print("  Evaluation Metrics:", metrics.get("eval", "N/A"))
+        print("--------------------" + "-" * len(model))
 
 
 if __name__ == "__main__":

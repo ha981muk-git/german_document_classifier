@@ -26,17 +26,23 @@ Run the following commands in a Colab cell to clone the project and navigate int
 ### **Install Dependencies (Optional)**
 
 Most required packages are already available in Google Colab, but if needed, you can install the remaining ones:
-
+!pip install --upgrade-strategy only-if-needed -r requirements.txt
 ```bash
-!pip install -r requirements.txt
+!pip install faker pytesseract
 ```
+and 
+```bash
+!pip install --upgrade-strategy only-if-needed -r requirements.txt
+```
+
+
 
 ### **Fine-Tune the BERT Model**
 
 Execute the main script to start the fine-tuning process:
 
 ```bash
-!python app/main.py
+!python app/main.py --train
 ```
 
 ---
@@ -62,14 +68,28 @@ conda activate doc-classifier-env
 ### **2.3 Synthetic Data Generation**
 
 ```bash
-python app/sampler/doc_generator.py
+python app/main.py --generate
 ```
-## **2.4 Training the BERT Models**
+
+### **2.4 Prepare CSV File  For Datesets Training**
 
 ```bash
-python app/main.py
+python app/main.py --prepare
 ```
-## **2.5 FastAPI Web Server**
+
+## **2.5 Training the BERT Models**
+
+```bash
+python app/main.py --train
+```
+
+## **2.6 Generate, Prepare and Training the BERT Models**
+
+```bash
+python app/main.py --all
+```
+
+## **2.7 FastAPI Web Server**
 
 The FastAPI service wraps the trained `DocumentClassifier` and exposes a single `/predict` endpoint that powers both the web UI and any programmatic client. It accepts either a `text` form field (for raw strings) or a `file` upload (for PDFs, images, or DOCs) and routes the request to the right inference path. Because the server also mounts the static frontend under `/`, you only need one process to serve both the UI and the API.
 
@@ -101,7 +121,7 @@ curl -X POST http://127.0.0.1:8000/predict \
 
 
 
-### **2.6 Hyperparameter Searching**
+### **2.8 Hyperparameter Searching**
 
 ```bash
 python app/hyperparamsearch.py

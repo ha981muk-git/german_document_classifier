@@ -1907,24 +1907,3 @@ def save_synthetic_texts(per_category=200, out_dir="data/synthetic", overwrite=F
     return result['total_files']
 
 
-if __name__ == "__main__":
-    # Generate and save all documents as individual .txt files
-    print("=" * 60)
-    print("GERMAN BUSINESS DOCUMENT GENERATOR")
-    print("Generating synthetic training data as .txt files")
-    print("=" * 60)
-    print()
-    
-    # Option 1: Use the detailed function with statistics
-    result = save_all_synthetic_as_text_files(
-        per_category=200,
-        output_dir="data/synthetic",
-        overwrite=False
-    )
-    
-    # Option 2: Or use the simpler function
-    # total = save_synthetic_texts(per_category=200, out_dir="data/synthetic", overwrite=False)
-    # print(f"Done — wrote {total} text files to data/synthetic/")
-    
-    print("\n✨ Generation complete! You can now use these files for training.")
-    print(f"   Each document is saved as a separate .txt file in: {result['output_dir']}")

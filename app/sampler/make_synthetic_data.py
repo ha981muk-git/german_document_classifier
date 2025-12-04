@@ -277,9 +277,3 @@ Bitte kontaktieren Sie mich zur Klärung.
                 files_written += 1
 
         return files_written
-
-
-if __name__ == "__main__":
-    generator = SyntheticDocumentGenerator(per_category=200, output_dir="data/synthetic/")
-    written = generator.generate_documents(overwrite=False)
-    print(f"✅ Generated {written} diverse German business documents in {generator.output_dir}/")

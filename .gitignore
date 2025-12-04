@@ -1,14 +1,26 @@
-app/flow_models/
-optuna_studies.db
-app/data/raw
-app/data/synthetic
-app/models*
+# Python cache
 __pycache__/
 app/__pycache__/
-app/src/__pycache__
-app/models/
+app/src/__pycache__/
+
+# Metaflow metadata
 app/.metaflow
-.readme.md
-.DS_Store
-sandbox/
+
+# Models
+app/models/
 models/
+app/models*
+
+# Data
+app/data/raw/
+app/data/synthetic/
+optuna_studies.db
+
+# Notebooks / temporary files
+*.ipynb_checkpoints
+sandbox/
+
+# OS / editor files
+.DS_Store
+.readme.md
+.vscode/

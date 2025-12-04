@@ -61,11 +61,11 @@ async function loadModels() {
     const select = document.getElementById("modelSelect");
     select.innerHTML = "";
 
-    data.models.forEach(model => {
+    data.available_models.forEach(model => {
         const opt = document.createElement("option");
         opt.value = model;
         opt.textContent = model;
-        if (model === data.default) opt.selected = true;
+        if (model === data.default_model) opt.selected = true;
         select.appendChild(opt);
     });
 }
@@ -125,12 +125,20 @@ async function predict() {
         box.style.display = "block";
 
         box.innerHTML = `
-            <div class="label-title">Classified as: ${data.result.label.toUpperCase()}</div>
+            <div class="label-title">Classified as: <span>${data.result.label.toUpperCase()}</span></div>
+
+            <div class="confidence-bar-container">
+                <div class="confidence-bar" style="width: ${data.result.confidence * 100}%;">
+                    ${(data.result.confidence * 100).toFixed(1)}% Confidence
+                </div>
+            </div>
 
             <div class="details">
                 <strong>Details:</strong><br>
                 Mode: ${data.mode}<br>
+                Filename: ${data.filename || 'N/A'}<br>
                 Label: ${data.result.label}<br>
+                Confidence: ${data.result.confidence.toFixed(4)}<br>
                 Label ID: ${data.result.label_id}
             </div>
 

@@ -32,7 +32,7 @@ class Config:
         "dbmdz/bert-base-german-cased",
     ]
     LEARNING_RATE = 3e-5
-    EPOCHS = 1
+    EPOCHS = 10
 
 
 # -----------------------------

@@ -22,9 +22,8 @@ RAW_DIR = DATA_DIR / "raw"
 SYNTHETIC_DIR = DATA_DIR / "synthetic"
 PROCESSED_DIR = DATA_DIR / "processed"
 
+DIRS_TO_CREATE = [RAW_DIR, SYNTHETIC_DIR, PROCESSED_DIR]
+
 # Automatically create directories if missing
-for d in [RAW_DIR, SYNTHETIC_DIR, PROCESSED_DIR]:
+for d in DIRS_TO_CREATE:
     d.mkdir(parents=True, exist_ok=True)
-
-
-

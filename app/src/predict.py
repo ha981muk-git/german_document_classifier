@@ -38,36 +38,6 @@ class DocumentClassifier:
         self.label_encoder = load_label_encoder(model_path)
         self.label_classes = self.label_encoder.classes_
 
-    # -----------------------
-    # CLEAN TEXT (preprocessing)
-    # -----------------------
-    def preprocess_text(self, text: str) -> str:
-        return clean_text(text)
-
-    def page_contains_image(self, page):
-        """Detect whether a PDF page contains image blocks (PyMuPDF type 1)."""
-        try:
-            info = page.get_text("dict")
-        except:
-            return False
-
-        blocks = info.get("blocks", [])
-        if not blocks:
-            return False
-
-        for block in blocks:
-            # PyMuPDF image blocks have type == 1
-            if block.get("type") == 1:
-                return True
-
-        return False
-
-
-    # -----------------------
-    # EXTRACT TEXT FROM PDF
-    # -----------------------
-    def extract_text_from_pdf(self, pdf_path: str) -> str:
-        return extract_pdf(pdf_path)
 
     # -----------------------
     # EXTRACT TEXT FROM IMAGE (OCR)
@@ -99,7 +69,7 @@ class DocumentClassifier:
 
         # --- PDF ---
         if mime == "application/pdf":
-            return self.extract_text_from_pdf(file_path)
+            return extract_pdf(file_path)
 
         # --- IMAGES ---
         if mime.startswith("image/"):
@@ -128,7 +98,7 @@ class DocumentClassifier:
     # PREDICT TEXT DIRECTLY
     # -----------------------
     def predict(self, text: str) -> Dict[str, Any]:
-        clean = self.preprocess_text(text)
+        clean = clean_text(text)
 
         inputs = self.tokenizer(
             clean,

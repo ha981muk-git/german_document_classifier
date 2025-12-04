@@ -12,6 +12,8 @@ models/
 app/models*
 
 # Data
+app/data/processed/raw_data.csv
+app/data/processed/synthetic_data.csv
 app/data/raw/
 app/data/synthetic/
 optuna_studies.db
@@ -19,6 +21,7 @@ optuna_studies.db
 # Notebooks / temporary files
 *.ipynb_checkpoints
 sandbox/
+evaluation_results_20251204_213215.json
 
 # OS / editor files
 .DS_Store

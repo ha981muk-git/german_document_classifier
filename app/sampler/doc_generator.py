@@ -1813,7 +1813,7 @@ Hochachtungsvoll
         
         return files_written
 
-def save_all_synthetic_as_text_files(per_category=200, output_dir="data/synthetic", overwrite=False):
+def save_all_synthetic_as_text_files(per_category=200, output_dir="app/data/synthetic", overwrite=False):
     """
     Generate all document types and save each one as a separate .txt file
     
@@ -1856,7 +1856,7 @@ def save_all_synthetic_as_text_files(per_category=200, output_dir="data/syntheti
         # Save each document as a separate .txt file
         files_written = 0
         for i, doc in enumerate(documents, start=1):
-            filename = category_dir / f"{category.rstrip('s')}_{i}.txt"
+            filename = category_dir / f"{category.rstrip('s')}_v1_{i}.txt"
             
             # Skip if file exists and overwrite is False
             if filename.exists() and not overwrite:
@@ -1890,7 +1890,7 @@ def save_all_synthetic_as_text_files(per_category=200, output_dir="data/syntheti
     }
 
 
-def save_synthetic_texts(per_category=200, out_dir="data/synthetic", overwrite=False):
+def save_synthetic_texts(per_category=200, out_dir="app/data/synthetic", overwrite=False):
     """
     Alternative function name for compatibility
     Generates documents using the make_* helpers and saves each document as a UTF-8 .txt file.

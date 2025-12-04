@@ -10,7 +10,7 @@ class SyntheticDocumentGenerator:
     def __init__(
         self,
         per_category: int = 200,
-        output_dir: str = "data/synthetic",
+        output_dir: str = "app/data/synthetic",
         locales: Optional[Sequence[str]] = None,
         seed: Optional[int] = None,
     ) -> None:
@@ -270,7 +270,7 @@ Bitte kontaktieren Sie mich zur Klärung.
             category_dir = self.output_dir / category
             category_dir.mkdir(exist_ok=True)
             for i in range(per_category):
-                filename = category_dir / f"{category.rstrip('s')}_{i+1}.txt"
+                filename = category_dir / f"{category.rstrip('s')}_v0_{i+1}.txt"
                 if filename.exists() and not overwrite:
                     continue
                 filename.write_text(generator(), encoding="utf-8")

@@ -88,12 +88,13 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.generate or args.all:
-        print("GENERATING SYNTHETIC DATA ...")
+        print("GENERATING SYNTHETIC DATA I ...")
         save_all_synthetic_as_text_files(
             per_category=200,
             output_dir=str(SYNTHETIC_DIR),
             overwrite=False
         )
+        print("GENERATING SYNTHETIC DATA II ...")
         generator = SyntheticDocumentGenerator(per_category=100, output_dir=str(SYNTHETIC_DIR))
         generator.generate_documents(overwrite=False)
 

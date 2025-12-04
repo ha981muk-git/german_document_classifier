@@ -12,18 +12,21 @@ import argparse
 # Configuration
 # -----------------------------
 
-LABEL_MAP = {
-    "complaints": "complaint",
-    "contracts": "contract",
-    "invoices": "invoice",
-    "orders": "order",
-    "paymentreminders": "reminder",
-}
-
-MODELS = [
-    "deepset/gbert-base",
-    "dbmdz/bert-base-german-cased",
-]
+class Config:
+    """Configuration for the training pipeline."""
+    LABEL_MAP = {
+        "complaints": "complaint",
+        "contracts": "contract",
+        "invoices": "invoice",
+        "orders": "order",
+        "paymentreminders": "reminder",
+    }
+    MODELS_TO_TRAIN = [
+        "deepset/gbert-base",
+        "dbmdz/bert-base-german-cased",
+    ]
+    LEARNING_RATE = 3e-5
+    EPOCHS = 10
 
 
 # -----------------------------
@@ -37,37 +40,36 @@ def combine_csv_files(processed_dir: Path) -> Path:
     if not csv_files:
         raise FileNotFoundError("No CSV files found in PROCESSED_DIR.")
 
-    df_list = [pd.read_csv(f) for f in csv_files]
-    all_data = pd.concat(df_list, ignore_index=True)
-
     output_csv = processed_dir / "all_data.csv"
 
-    if not output_csv.exists():
+    if output_csv.exists():
+        print(f"Using existing combined CSV: {output_csv}")
+    else:
+        print(f"Combining {len(csv_files)} CSV files into {output_csv}...")
+        df_list = [pd.read_csv(f) for f in csv_files]
+        all_data = pd.concat(df_list, ignore_index=True)
         all_data.to_csv(output_csv, index=False)
         print(f"Created combined CSV: {output_csv}")
-    else:
-        print(f"Using existing CSV: {output_csv}")
 
-    print(f"Combined {len(csv_files)} CSV files into {output_csv}")
     return output_csv
 
 
-def prepare_datasets():
+def prepare_datasets() -> None:
     """Optional dataset preparation (commented out in your current version)."""
 
     raw_csv = Path(PROCESSED_DIR) / "raw_data.csv"
-    process_dataset(RAW_DIR, str(raw_csv), LABEL_MAP)
+    process_dataset(RAW_DIR, str(raw_csv), Config.LABEL_MAP)
 
     if SYNTHETIC_DIR is not None:
         synthetic_csv = Path(PROCESSED_DIR) / "synthetic_data.csv"
-        process_dataset(SYNTHETIC_DIR, str(synthetic_csv), LABEL_MAP)
+        process_dataset(SYNTHETIC_DIR, str(synthetic_csv), Config.LABEL_MAP)
 
 
 # -----------------------------
 # Main Training Loop
 # -----------------------------
 
-def main():
+def main() -> None:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--prepare", action="store_true", help="Run dataset preparation")
@@ -80,28 +82,27 @@ def main():
 
     processed_dir = Path(PROCESSED_DIR)
     csv_path = combine_csv_files(processed_dir)
-    csv_path = str(csv_path)  # convert to string for model functions
 
     results = {}
 
-    for model_name in MODELS:
+    for model_name in Config.MODELS_TO_TRAIN:
         print(f"\n🚀 Training {model_name}")
 
         save_path = str(PROJECT_ROOT / "models" / model_name.replace("/", "_"))
 
         train_metrics = train_model(
             model_name=model_name,
-            csv_path=csv_path,
+            csv_path=str(csv_path),
             save_path=save_path,
-            learning_rate=3e-5,
-            epochs=10
+            learning_rate=Config.LEARNING_RATE,
+            epochs=Config.EPOCHS
         )
 
         print("\nTraining metrics:")
         print(train_metrics)
 
         print("\n🔍 Evaluating on test set...")
-        eval_metrics = evaluate_model(save_path, csv_path)
+        eval_metrics = evaluate_model(save_path, str(csv_path))
 
         print("Evaluation metrics:")
         print(eval_metrics)

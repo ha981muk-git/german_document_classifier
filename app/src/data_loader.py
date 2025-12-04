@@ -19,7 +19,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 def load_and_prepare_data(csv_path: str,
                           label_classes_output: Optional[str]=None,
                           test_size: float = 0.3,        
-                          val_size: float = 0.5,         
+                          val_size: float = 0.5,  # Proportion of the test set to use for validation
                           random_state: int = 42         
     ) -> Tuple[DatasetDict, LabelEncoder]:
     csv_path = Path(csv_path)

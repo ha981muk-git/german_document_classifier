@@ -10,7 +10,7 @@ class SyntheticDocumentGenerator:
     def __init__(
         self,
         per_category: int = 200,
-        output_dir: str = "data/data_synthetic",
+        output_dir: str = "data/synthetic",
         locales: Optional[Sequence[str]] = None,
         seed: Optional[int] = None,
     ) -> None:
@@ -22,11 +22,11 @@ class SyntheticDocumentGenerator:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.generators = {
-            "invoice": self.make_invoice,
-            "contract": self.make_contract,
-            "order": self.make_order,
-            "reminder": self.make_reminder,
-            "complaint": self.make_complaint,
+            "invoices": self.make_invoice,
+            "contracts": self.make_contract,
+            "orders": self.make_order,
+            "paymentreminders": self.make_reminder,
+            "complaints": self.make_complaint,
         }
 
     def random_date(self) -> str:
@@ -267,8 +267,10 @@ Bitte kontaktieren Sie mich zur Klärung.
         files_written = 0
 
         for category, generator in self.generators.items():
+            category_dir = self.output_dir / category
+            category_dir.mkdir(exist_ok=True)
             for i in range(per_category):
-                filename = self.output_dir / f"{category}_{i+1}.txt"
+                filename = category_dir / f"{category.rstrip('s')}_{i+1}.txt"
                 if filename.exists() and not overwrite:
                     continue
                 filename.write_text(generator(), encoding="utf-8")
@@ -278,6 +280,6 @@ Bitte kontaktieren Sie mich zur Klärung.
 
 
 if __name__ == "__main__":
-    generator = SyntheticDocumentGenerator(per_category=200, output_dir="data/data_synthetic")
+    generator = SyntheticDocumentGenerator(per_category=200, output_dir="data/synthetic/")
     written = generator.generate_documents(overwrite=False)
     print(f"✅ Generated {written} diverse German business documents in {generator.output_dir}/")

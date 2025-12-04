@@ -1813,7 +1813,7 @@ Hochachtungsvoll
         
         return files_written
 
-def save_all_synthetic_as_text_files(per_category=200, output_dir="data/data_synthetic", overwrite=False):
+def save_all_synthetic_as_text_files(per_category=200, output_dir="data/synthetic", overwrite=False):
     """
     Generate all document types and save each one as a separate .txt file
     
@@ -1834,11 +1834,11 @@ def save_all_synthetic_as_text_files(per_category=200, output_dir="data/data_syn
     
     # Document types to generate
     document_types = {
-        'invoice': generator.generate_invoices,
-        'contract': generator.generate_contracts,
-        'order': generator.generate_purchase_orders,
-        'reminder': generator.generate_reminders,
-        'complaint': generator.generate_complaints
+        'invoices': generator.generate_invoices,
+        'contracts': generator.generate_contracts,
+        'orders': generator.generate_purchase_orders,
+        'paymentreminders': generator.generate_reminders,
+        'complaints': generator.generate_complaints
     }
     
     print(f"Generating {per_category} documents per category...")
@@ -1850,10 +1850,13 @@ def save_all_synthetic_as_text_files(per_category=200, output_dir="data/data_syn
         # Generate documents for this category
         documents = generate_func(per_category)
         
+        category_dir = output_path / category
+        category_dir.mkdir(exist_ok=True)
+        
         # Save each document as a separate .txt file
         files_written = 0
         for i, doc in enumerate(documents, start=1):
-            filename = output_path / f"{category}_{i}.txt"
+            filename = category_dir / f"{category.rstrip('s')}_{i}.txt"
             
             # Skip if file exists and overwrite is False
             if filename.exists() and not overwrite:
@@ -1887,7 +1890,7 @@ def save_all_synthetic_as_text_files(per_category=200, output_dir="data/data_syn
     }
 
 
-def save_synthetic_texts(per_category=200, out_dir="data/data_synthetic", overwrite=False):
+def save_synthetic_texts(per_category=200, out_dir="data/synthetic", overwrite=False):
     """
     Alternative function name for compatibility
     Generates documents using the make_* helpers and saves each document as a UTF-8 .txt file.
@@ -1915,13 +1918,13 @@ if __name__ == "__main__":
     # Option 1: Use the detailed function with statistics
     result = save_all_synthetic_as_text_files(
         per_category=200,
-        output_dir="data/data_synthetic",
+        output_dir="data/synthetic",
         overwrite=False
     )
     
     # Option 2: Or use the simpler function
-    # total = save_synthetic_texts(per_category=200, out_dir="data/data_synthetic", overwrite=False)
-    # print(f"Done — wrote {total} text files to data/data_synthetic/")
+    # total = save_synthetic_texts(per_category=200, out_dir="data/synthetic", overwrite=False)
+    # print(f"Done — wrote {total} text files to data/synthetic/")
     
     print("\n✨ Generation complete! You can now use these files for training.")
     print(f"   Each document is saved as a separate .txt file in: {result['output_dir']}")

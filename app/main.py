@@ -7,7 +7,9 @@ from core.paths import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, SYNTHETIC_DIR
 from src.prepare_data import process_dataset
 from src.train import train_model
 from src.evaluate import evaluate_model
+import json
 import argparse
+from datetime import datetime
 
 # -----------------------------
 # Configuration
@@ -119,6 +121,14 @@ def main() -> None:
         print("  Training Metrics:", metrics.get("train", "N/A"))
         print("  Evaluation Metrics:", metrics.get("eval", "N/A"))
         print("--------------------" + "-" * len(model))
+
+    # Save the final results to a JSON file with a timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    results_filename = f"evaluation_results_{timestamp}.json"
+    results_path = PROJECT_ROOT / results_filename
+    print(f"\n💾 Saving final results to {results_path}")
+    with open(results_path, "w") as f:
+        json.dump(results, f, indent=4)
 
 
 if __name__ == "__main__":

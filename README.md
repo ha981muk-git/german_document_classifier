@@ -83,7 +83,7 @@ python app/main.py --prepare
 python app/main.py --train
 ```
 
-## **2.6 Generate, Prepare and Training the BERT Models**
+## **2.6 Alternatively Generate, Prepare and Training the BERT Models (All At Once)**
 
 ```bash
 python app/main.py --all

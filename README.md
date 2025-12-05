@@ -65,13 +65,13 @@ conda activate doc-classifier-env
 ---
 
 
-### **2.3 Synthetic Data Generation**
+### **2.3 Synthetic Data Generation (Optional)**
 
 ```bash
 python app/main.py --generate
 ```
 
-### **2.4 Prepare CSV File  For Datesets Training**
+### **2.4 Prepare CSV File  For Datesets Training (Optional)**
 
 ```bash
 python app/main.py --prepare

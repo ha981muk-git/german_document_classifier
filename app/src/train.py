@@ -183,7 +183,10 @@ def train_model(
     test_metrics = trainer.evaluate(eval_dataset=dataset["test"])
     print(f"Test metrics: {test_metrics}")
 
-    return test_metrics
+    return {
+        "train": best_validation_metrics,
+        "eval": test_metrics
+    }
 
     """
     Deefault return block: --- IGNORE --

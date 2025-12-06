@@ -138,24 +138,15 @@ def main() -> None:
 
             save_path = str(PROJECT_ROOT / "models" / model_name.replace("/", "_"))
 
-            train_metrics = train_model(
+            # train_model now returns the final test metrics after evaluating the best model
+            all_metrics = train_model(
                 model_name=model_name,
                 csv_path=str(csv_path),
                 save_path=save_path,
                 learning_rate=Config.LEARNING_RATE,
                 epochs=Config.EPOCHS
             )
-
-            print(f"\nTraining metrics for {model_name}:")
-            print(train_metrics)
-            results[model_name]["train"] = train_metrics
-
-            print(f"\n🔍 Evaluating {model_name} on test set...")
-            eval_metrics = evaluate_model(save_path, str(csv_path))
-
-            print(f"Evaluation metrics for {model_name}:")
-            print(eval_metrics)
-            results[model_name]["eval"] = eval_metrics
+            results[model_name] = all_metrics
 
         print("\n📊 Final model results summary:")
         for model, metrics in results.items():

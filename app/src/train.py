@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 from pathlib import Path
 import torch, os
-from transformers import AutoModelForSequenceClassification, AutoConfig, TrainingArguments, Trainer
+from transformers import AutoModelForSequenceClassification, AutoConfig, TrainingArguments, Trainer, DataCollatorWithPadding
 from .data_loader import load_and_prepare_data, tokenize_dataset
 from sklearn.metrics import precision_recall_fscore_support
 from transformers import EarlyStoppingCallback
@@ -137,12 +137,15 @@ def train_model(
     early_stopping_threshold=0.0
     )
 
+    # Data collator for dynamic padding
+    data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
     trainer = Trainer(
         model=model,
         args=args,
         train_dataset=dataset["train"],
         eval_dataset=dataset["validation"],
+        data_collator=data_collator,
         compute_metrics=compute_metrics,
         callbacks=[early_stopping],
     )

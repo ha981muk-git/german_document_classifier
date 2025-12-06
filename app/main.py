@@ -158,7 +158,7 @@ def main() -> None:
         # Save the final results to a JSON file with a timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         results_filename = f"evaluation_results_{timestamp}.json"
-        results_path = PROJECT_ROOT / results_filename
+        results_path = PROJECT_ROOT / "models" / results_filename
         print(f"\n💾 Saving final results to {results_path}")
         with open(results_path, "w") as f:
             json.dump(results, f, indent=4)

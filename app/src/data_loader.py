@@ -18,8 +18,8 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def load_and_prepare_data(csv_path: str,
                           label_classes_output: Optional[str]=None,
-                          test_size: float = 0.3,        
-                          val_size: float = 0.5,  # Proportion of the test set to use for validation
+                          validation_test_split_size: float = 0.3, # e.g., 0.3 creates a 70% train / 30% temp split
+                          test_proportion_of_split: float = 0.5,  # e.g., 0.5 splits the 30% temp set into 15% validation and 15% test
                           random_state: int = 42         
     ) -> Tuple[DatasetDict, LabelEncoder]:
     csv_path = Path(csv_path)
@@ -49,10 +49,10 @@ def load_and_prepare_data(csv_path: str,
         save_label_encoder(label_encoder, label_classes_output)
 
     train_df, temp_df = train_test_split(
-        df, test_size=test_size, stratify=df["label"], random_state=random_state
+        df, test_size=validation_test_split_size, stratify=df["label"], random_state=random_state
     )
     val_df, test_df = train_test_split(
-        temp_df, test_size=val_size, stratify=temp_df["label"], random_state=random_state
+        temp_df, test_size=test_proportion_of_split, stratify=temp_df["label"], random_state=random_state
     )
 
     dataset = DatasetDict({
@@ -71,9 +71,8 @@ def tokenize_dataset(dataset:DatasetDict, tokenizer_name: str ="dbmdz/bert-base-
     def tokenize(example):
         return tokenizer(
             example["text"],
-            padding="max_length",
             truncation=True,
-            max_length=max_length,
+            max_length=max_length
         )
 
     dataset = dataset.map(

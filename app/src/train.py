@@ -147,12 +147,16 @@ def train_model(
         callbacks=[early_stopping],
     )
 
-    trainer.train()
+    # The train() method returns the final training metrics
+    train_result = trainer.train()
 
+    # The best model is already loaded thanks to `load_best_model_at_end=True`
     model.save_pretrained(save_path)
     tokenizer.save_pretrained(save_path)
 
     # Save training configuration
+    # Capture the best validation metrics from the training process
+    best_validation_metrics = train_result.metrics
 
     training_config = {
         "model_name": model_name,
@@ -167,11 +171,16 @@ def train_model(
         "device": str(device),
         "num_labels": len(label_encoder.classes_), 
         "label_classes": label_encoder.classes_.tolist(),
+        "best_validation_metrics": best_validation_metrics,
     }
     save_training_config(training_config, str(save_path))
 
-    # Evaluate and return test metrics
-    return trainer.evaluate(eval_dataset=dataset["test"])  
+    # Now, explicitly evaluate on the held-out test set
+    print("Evaluating on the final test set...")
+    test_metrics = trainer.evaluate(eval_dataset=dataset["test"])
+    print(f"Test metrics: {test_metrics}")
+
+    return test_metrics
 
     """
     Deefault return block: --- IGNORE --

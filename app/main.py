@@ -1,5 +1,3 @@
-from email import generator
-import sys
 from pathlib import Path
 import yaml
 import pandas as pd
@@ -45,7 +43,7 @@ def combine_csv_files(processed_dir: Path) -> Path:
 
 
 def prepare_datasets(config: dict) -> None:
-    """Optional dataset preparation (commented out in your current version)."""
+    """Process raw and synthetic data into separate CSV files."""
 
     raw_csv = Path(PROCESSED_DIR) / "raw_data.csv"
     process_dataset(RAW_DIR, str(raw_csv), config["label_map"])

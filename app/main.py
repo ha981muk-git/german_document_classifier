@@ -1,6 +1,7 @@
 from email import generator
 import sys
 from pathlib import Path
+import yaml
 import pandas as pd
 from collections import defaultdict
 
@@ -13,50 +14,6 @@ from src.evaluate import evaluate_model
 import json
 import argparse
 from datetime import datetime
-
-# -----------------------------
-# Configuration
-# -----------------------------
-
-class Config:
-    """Configuration for the training pipeline."""
-    LABEL_MAP = {
-        "complaints": "complaint",
-        "contracts": "contract",
-        "invoices": "invoice",
-        "orders": "order",
-        "paymentreminders": "reminder",
-    }
-
-    MODELS_TO_TRAIN = [
-        # --- High Performance (Standard) ---
-        # "The Optimized One": Best general performance, Whole Word Masking. ~440MB
-        "deepset/gbert-base",
-
-        # "The Classic Baseline": The standard German BERT by MDZ. Very common. ~440MB
-        "dbmdz/bert-base-german-cased",
-
-        # "Legacy/Generic": Often refers to the older Deepset model. ~440MB
-        "bert-base-german-cased",   
-
-        # --- Architecturally Different ---
-        # "The Efficient One": Uses ELECTRA (Discriminator/Generator). Good efficiency. ~440MB
-        "deepset/gelectra-base",
-
-        # "The Fast One": Distilled model. Smallest (~270MB), fastest speed, lower costs.
-        "distilbert-base-german-cased",
-
-        # "The Big Data One": RoBERTa architecture. Trained on massive OSCAR dataset. ~500MB
-        "uklfr/gottbert-base"
-    ]
-     
-    LEARNING_RATE = 3e-5
-    EPOCHS = 10
-
-    # Synthetic data generation parameters
-    SYNTHETIC_PER_CATEGORY_V0 = 200
-    SYNTHETIC_PER_CATEGORY_V1 = 100
-    SYNTHETIC_OVERWRITE = False
 
 
 # -----------------------------
@@ -87,15 +44,15 @@ def combine_csv_files(processed_dir: Path) -> Path:
     return output_csv
 
 
-def prepare_datasets() -> None:
+def prepare_datasets(config: dict) -> None:
     """Optional dataset preparation (commented out in your current version)."""
 
     raw_csv = Path(PROCESSED_DIR) / "raw_data.csv"
-    process_dataset(RAW_DIR, str(raw_csv), Config.LABEL_MAP)
+    process_dataset(RAW_DIR, str(raw_csv), config["label_map"])
 
     if SYNTHETIC_DIR is not None:
         synthetic_csv = Path(PROCESSED_DIR) / "synthetic_data.csv"
-        process_dataset(SYNTHETIC_DIR, str(synthetic_csv), Config.LABEL_MAP)
+        process_dataset(SYNTHETIC_DIR, str(synthetic_csv), config["label_map"])
 
 
 # -----------------------------
@@ -103,6 +60,11 @@ def prepare_datasets() -> None:
 # -----------------------------
 
 def main() -> None:
+
+    # Load configuration from YAML
+    config_path = PROJECT_ROOT / "config.yaml"
+    with open(config_path, "r") as f:
+        config = yaml.safe_load(f)
 
     parser = argparse.ArgumentParser(description="German Document Classifier Pipeline")
     parser.add_argument("--generate", action="store_true", help="Step 1: Generate synthetic data files.")
@@ -114,17 +76,17 @@ def main() -> None:
     if args.generate or args.all:
         print("GENERATING SYNTHETIC DATA V0 ...")
         save_all_synthetic_as_text_files(
-            per_category=Config.SYNTHETIC_PER_CATEGORY_V0,
+            per_category=config["synthetic_data"]["per_category_v0"],
             output_dir=str(SYNTHETIC_DIR),
-            overwrite=Config.SYNTHETIC_OVERWRITE
+            overwrite=config["synthetic_data"]["overwrite"]
         )
         print("GENERATING SYNTHETIC DATA V1 ...")
-        generator = SyntheticDocumentGenerator(per_category=Config.SYNTHETIC_PER_CATEGORY_V1, output_dir=str(SYNTHETIC_DIR))
-        generator.generate_documents(overwrite=Config.SYNTHETIC_OVERWRITE)
+        generator = SyntheticDocumentGenerator(per_category=config["synthetic_data"]["per_category_v1"], output_dir=str(SYNTHETIC_DIR))
+        generator.generate_documents(overwrite=config["synthetic_data"]["overwrite"])
 
     if args.prepare or args.all:
         print("PREPARING DATASETS")
-        prepare_datasets()
+        prepare_datasets(config)
 
     if args.train or args.all:
         print("TRAINING MODELS")
@@ -133,7 +95,7 @@ def main() -> None:
 
         results = defaultdict(dict)
 
-        for model_name in Config.MODELS_TO_TRAIN:
+        for model_name in config["models_to_train"]:
             print(f"\n🚀 Training {model_name}")
 
             save_path = str(PROJECT_ROOT / "models" / model_name.replace("/", "_"))
@@ -143,8 +105,8 @@ def main() -> None:
                 model_name=model_name,
                 csv_path=str(csv_path),
                 save_path=save_path,
-                learning_rate=Config.LEARNING_RATE,
-                epochs=Config.EPOCHS
+                learning_rate=config["training"]["learning_rate"],
+                epochs=config["training"]["epochs"]
             )
             results[model_name] = all_metrics
 

@@ -39,6 +39,6 @@ synthetic_data:
 
 data_split:
   # e.g., 0.3 creates a 70% train / 30% temp split
-  validation_test_split_size: 0.3
+  validation_test_split_size: 0.4
   # e.g., 0.5 splits the 30% temp set into 15% validation and 15% test
   test_proportion_of_split: 0.5

@@ -42,3 +42,26 @@ data_split:
   validation_test_split_size: 0.4
   # e.g., 0.5 splits the 30% temp set into 15% validation and 15% test
   test_proportion_of_split: 0.5
+
+
+#  (existing configurations)
+
+hpo_config:
+  n_trials: 10
+  epochs: 3
+  keep_top_n_trials: 2
+  storage_db: "sqlite:///optuna_studies.db"
+  leaderboard_path: "./models/hpo_leaderboard.csv"
+  search_space:
+    learning_rate:
+      type: "float"
+      args: [1.0e-6, 5.0e-5, "log"]
+    dropout:
+      type: "float"
+      args: [0.0, 0.3]
+    weight_decay:
+      type: "float"
+      args: [0.0, 0.3]
+    batch_size:
+      type: "categorical"
+      args: [[2, 4, 8]]

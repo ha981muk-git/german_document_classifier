@@ -6,19 +6,10 @@ import optuna
 import pandas as pd
 from src.train import train_model
 from pathlib import Path
-from core.paths import PROJECT_ROOT, APP_DIR
+from core.paths import PROJECT_ROOT, PROCESSED_DIR
+import yaml
 
-from pathlib import Path
-
-STORAGE_URL = f"sqlite:///{(PROJECT_ROOT / 'optuna_studies.db')}"
-CSV_PATH = APP_DIR / "data" / "data_processed" / "all_data.csv"
-
-
-MODELS = [
-    "deepset/gbert-base",
-    "dbmdz/bert-base-german-cased"
-]
-
+CSV_PATH = PROCESSED_DIR / "all_data.csv"
 
 # ================================
 # TOP-N CLEANUP (now top-level)
@@ -47,30 +38,40 @@ def cleanup_folders(study, model_root, keep_top_n=2):
 # ================================
 # OBJECTIVE (now clean)
 # ================================
-def build_objective(model_name):
+def build_objective(model_name: str, config: dict):
 
     model_root = str(Path("models") / model_name.replace('/', '_') / "hpo")
+    hpo_config = config["hpo_config"]
+    search_space = hpo_config["search_space"]
 
     def objective(trial):
 
-        lr = trial.suggest_float("learning_rate", 1e-6, 5e-5, log=True)
-        dropout = trial.suggest_float("dropout", 0.0, 0.3)
-        weight_decay = trial.suggest_float("weight_decay", 0.0, 0.3)
-        batch_size = trial.suggest_categorical("batch_size", [2, 4, 8])
+        params = {}
+        for param, settings in search_space.items():
+            suggest_type = settings["type"]
+            suggest_args = settings["args"]
+            
+            if suggest_type == "float":
+                is_log = suggest_args[2] if len(suggest_args) > 2 else False
+                params[param] = trial.suggest_float(param, suggest_args[0], suggest_args[1], log=is_log)
+            elif suggest_type == "categorical":
+                params[param] = trial.suggest_categorical(param, suggest_args[0])
+            elif suggest_type == "int":
+                params[param] = trial.suggest_int(param, suggest_args[0], suggest_args[1])
 
         trial_dir = os.path.join(model_root, f"trial_{trial.number}")
         os.makedirs(trial_dir, exist_ok=True)
 
         metrics = train_model(
             model_name=model_name,
-            csv_path=CSV_PATH,
+            csv_path=str(CSV_PATH),
             save_path=trial_dir,
-            learning_rate=lr,
-            train_batch=batch_size,
-            eval_batch=batch_size,
-            epochs=5,
-            weight_decay=weight_decay,
-            dropout=dropout
+            learning_rate=params["learning_rate"],
+            train_batch=params.get("batch_size"),
+            eval_batch=params.get("batch_size"),
+            epochs=hpo_config.get("epochs", 3),
+            weight_decay=params["weight_decay"],
+            dropout=params["dropout"]
         )
 
         trial.set_user_attr("metrics", metrics)
@@ -84,32 +85,46 @@ def build_objective(model_name):
 # RUN HPO (clean + safe)
 # ================================
 if __name__ == "__main__":
-    print("🚀 Starting MULTI-MODEL Optuna HPO (Top-3 memory-saving mode)...")
+    # Load configuration from YAML
+    config_path = PROJECT_ROOT / "config.yaml"
+    with open(config_path, "r") as f:
+        config = yaml.safe_load(f)
+
+    hpo_config = config["hpo_config"]
+    models_to_train = config["models_to_train"]
+
+    print(f"🚀 Starting MULTI-MODEL Optuna HPO (keep top {hpo_config['keep_top_n_trials']} trials)...")
     global_best_rows = []
 
-    for model_name in MODELS:
+    for model_name in models_to_train:
 
         print(f"\n🔍 Running HPO for model: {model_name}")
 
         model_root = str(PROJECT_ROOT / "models" / model_name.replace('/', '_') / "hpo")
         os.makedirs(model_root, exist_ok=True)
 
-        study_name = f"hpo_{model_name.replace('/', '_')}_{int(time.time())}"
+        study_name = f"hpo_{model_name.replace('/', '_')}"
+
+        # Ensure storage path is absolute
+        storage_path = hpo_config["storage_db"]
+        if storage_path.startswith("sqlite:///"):
+            db_file = storage_path.replace("sqlite:///", "")
+            storage_path = f"sqlite:///{PROJECT_ROOT / db_file}"
 
         study = optuna.create_study(
-            storage=STORAGE_URL,
+            storage=storage_path,
             study_name=study_name,
             direction="maximize",
-            load_if_exists=False
+            load_if_exists=True # Allow resuming studies
         )
 
-        objective = build_objective(model_name)
-        study.optimize(objective, n_trials=5)
+        objective = build_objective(model_name, config)
+        study.optimize(objective, n_trials=hpo_config["n_trials"])
 
         # ============================
         # SAFE CLEANUP (simple & clean)
         # ============================
-        cleanup_folders(study, model_root, keep_top_n=1)
+        cleanup_folders(study, model_root, keep_top_n=hpo_config["keep_top_n_trials"])
 
         # Save best hyperparameters
         best_params_path = os.path.join(model_root, "best_hyperparams.json")
@@ -133,16 +148,16 @@ if __name__ == "__main__":
         df.to_csv(csv_path, index=False)
         print(f"📄 Saved CSV: {csv_path}")
 
-        best_n = df.sort_values("eval_f1", ascending=False).head(2)
+        best_n = df.sort_values("eval_f1", ascending=False).head(hpo_config["keep_top_n_trials"])
 
         best_trials_path = os.path.join(model_root, "best_trials.json")
         best_n.to_json(best_trials_path, orient="records", indent=4)
-        print(f"🏆 Saved top-2 trials JSON: {best_trials_path}")
+        print(f"🏆 Saved top-{hpo_config['keep_top_n_trials']} trials JSON: {best_trials_path}")
 
         global_best_rows.append(best_n)
 
     leaderboard = pd.concat(global_best_rows, ignore_index=True)
-    leaderboard_path = "./models/hpo_leaderboard.csv"
+    leaderboard_path = hpo_config["leaderboard_path"]
     leaderboard.to_csv(leaderboard_path, index=False)
 
     print(f"\n📊 Global leaderboard saved at: {leaderboard_path}")

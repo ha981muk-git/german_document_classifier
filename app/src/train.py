@@ -166,7 +166,6 @@ def train_model(
 
     # Capture the best validation metrics from the training process
     print("Verifying best model on validation set...")
-    trainer.evaluate(eval_dataset=dataset["validation"])
     best_val_metrics = trainer.evaluate(eval_dataset=dataset["validation"])
 
     # Now, explicitly evaluate on the held-out test set

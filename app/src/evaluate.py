@@ -17,7 +17,10 @@ device = (
 )
 
 def evaluate_model(
-    model_path: str, csv_path: str, data_split_config: Optional[Dict] = None
+    model_path: str,
+    csv_path: str,
+    data_split_config: Optional[Dict] = None,
+    batch_size: int = 32,
 ) -> Dict[str, float]:
     # 1. Load data
     data_split_config = data_split_config or {}
@@ -33,7 +36,7 @@ def evaluate_model(
     model.eval()
 
     # 4. Batch loader
-    test_loader = DataLoader(dataset["test"], batch_size=32) # Larger batch size for eval is fine
+    test_loader = DataLoader(dataset["test"], batch_size=batch_size)
 
     all_preds = []
     all_labels = []

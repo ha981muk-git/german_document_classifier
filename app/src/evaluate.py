@@ -4,7 +4,7 @@ import torch
 import numpy as np
 from transformers import AutoModelForSequenceClassification
 from .data_loader import load_and_prepare_data, tokenize_dataset
-from typing import Dict
+from typing import Dict, Optional
 from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
 from sklearn.metrics import precision_recall_fscore_support
@@ -16,9 +16,12 @@ device = (
     torch.device("cpu")
 )
 
-def evaluate_model(model_path: str, csv_path: str) -> Dict[str, float]:
+def evaluate_model(
+    model_path: str, csv_path: str, data_split_config: Optional[Dict] = None
+) -> Dict[str, float]:
     # 1. Load data
-    dataset, label_encoder = load_and_prepare_data(csv_path)
+    data_split_config = data_split_config or {}
+    dataset, _ = load_and_prepare_data(csv_path, **data_split_config)
 
     # 2. Load tokenizer correctly
     dataset, _ = tokenize_dataset(dataset, tokenizer_name=str(model_path))

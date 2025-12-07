@@ -1,4 +1,10 @@
 # evaluate.py
+# train_model: Checks if the model learned correctly during creation
+# evaluate.py: Checks how the model performs in the wild or on specific datasets later like:
+# i) Testing on New Data (Months later),
+# ii) Benchmarking against other models,
+# iii) moved the saved_model/ folder to a new server 
+# and ran the script to confirm the model loads and predicts correctly before giving users access
 
 import torch
 import numpy as np

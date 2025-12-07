@@ -106,7 +106,8 @@ def main() -> None:
                 csv_path=str(csv_path),
                 save_path=save_path,
                 learning_rate=config["training"]["learning_rate"],
-                epochs=config["training"]["epochs"]
+                epochs=config["training"]["epochs"],
+                data_split_config=config.get("data_split", {})
             )
             results[model_name] = all_metrics
 

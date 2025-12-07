@@ -18,9 +18,9 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def load_and_prepare_data(csv_path: str,
                           label_classes_output: Optional[str]=None,
-                          validation_test_split_size: float = 0.3, # e.g., 0.3 creates a 70% train / 30% temp split
-                          test_proportion_of_split: float = 0.5,  # e.g., 0.5 splits the 30% temp set into 15% validation and 15% test
-                          random_state: int = 42         
+                          validation_test_split_size: float = 0.3,
+                          test_proportion_of_split: float = 0.5,
+                          random_state: int = 42
     ) -> Tuple[DatasetDict, LabelEncoder]:
     csv_path = Path(csv_path)
     if not csv_path.exists():

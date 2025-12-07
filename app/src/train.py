@@ -61,6 +61,7 @@ def train_model(
     gradient_accumulation: Optional[int] = None,  
     dropout: Optional[float] = None,
     early_stopping_patience: int = 3,  
+    data_split_config: Optional[Dict] = None,
 )-> Dict[str, float]:
 
     print(f"📌 Using device: {device}")
@@ -80,9 +81,11 @@ def train_model(
         user_gradient_accumulation=gradient_accumulation
     )
 
+    data_split_config = data_split_config or {}
     dataset, label_encoder = load_and_prepare_data(
         csv_path,
-        label_classes_output=f"{save_path}/label_classes.npy"
+        label_classes_output=f"{save_path}/label_classes.npy",
+        **data_split_config
     )
 
     dataset, tokenizer = tokenize_dataset(dataset, tokenizer_name=model_name, batch_size=1000)

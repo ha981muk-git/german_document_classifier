@@ -91,6 +91,6 @@ def load_label_encoder(model_path: str) -> LabelEncoder:
 
 
 def save_training_config(config: dict, model_path: str) -> None:
-    config_path = Path(model_path) / "training_config.json"
+    config_path = Path(model_path) / "experiment_report.json"
     with open(config_path, "w") as f:
         json.dump(config, f, indent=4)

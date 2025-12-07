@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 from pathlib import Path
 import torch, os,json
 from transformers import AutoModelForSequenceClassification, AutoConfig, TrainingArguments, Trainer, DataCollatorWithPadding
@@ -62,7 +62,7 @@ def train_model(
     dropout: Optional[float] = None,
     early_stopping_patience: int = 3,  
     data_split_config: Optional[Dict] = None,
-)-> Dict[str, float]:
+)-> Dict[str, Any]:
 
     print(f"📌 Using device: {device}")
 
@@ -183,8 +183,7 @@ def train_model(
         "model_type": model_name,
         
         # 1. THE RECIPE (Formerly 'training_config')
-        "best_validation_metrics": best_val_metrics,
-        "training_config": {
+        "hyperparameters": {
             "learning_rate": learning_rate,
             "epochs": epochs,
             "train_batch_size": train_batch_size,
@@ -194,6 +193,7 @@ def train_model(
             "warmup_steps": warmup_steps,
             "dropout": dropout,
             "device": str(device),
+            "fp16_enabled": use_fp16
         },
 
         # 2. THE DATASET INFO

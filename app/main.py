@@ -114,8 +114,8 @@ def main() -> None:
         print("\n📊 Final model results summary:")
         for model, metrics in results.items():
             print(f"\n--- MODEL: {model} ---")
-            print("  Training Metrics:", metrics.get("train", "N/A"))
-            print("  Evaluation Metrics:", metrics.get("eval", "N/A"))
+            print("  Validation Metrics:", metrics.get("validation", "N/A"))
+            print("  Test Metrics:", metrics.get("test", "N/A"))
             print("--------------------" + "-" * len(model))
 
         # Save the final results to a JSON file with a timestamp

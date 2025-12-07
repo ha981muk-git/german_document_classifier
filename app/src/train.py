@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 from pathlib import Path
-import torch, os
+import torch, os,json
 from transformers import AutoModelForSequenceClassification, AutoConfig, TrainingArguments, Trainer, DataCollatorWithPadding
 from .data_loader import load_and_prepare_data, tokenize_dataset
 from sklearn.metrics import precision_recall_fscore_support
@@ -161,34 +161,95 @@ def train_model(
     tokenizer.save_pretrained(save_path)
 
     # Save training configuration
-    # Capture the best validation metrics from the training process
-    best_validation_metrics = train_result.metrics
+    # To get training accuracy (if computed during training), we often look at state.log_history
+    global_train_metrics = train_result.metrics
 
-    training_config = {
-        "model_name": model_name,
-        "learning_rate": learning_rate,
-        "epochs": epochs,
-        "train_batch_size": train_batch_size,
-        "eval_batch_size": eval_batch_size,
-        "gradient_accumulation_steps": grad_accum,
-        "weight_decay": weight_decay,
-        "warmup_steps": warmup_steps,
-        "dropout": dropout,
-        "device": str(device),
-        "num_labels": len(label_encoder.classes_), 
-        "label_classes": label_encoder.classes_.tolist(),
-        "best_validation_metrics": best_validation_metrics,
-    }
-    save_training_config(training_config, str(save_path))
+    # Capture the best validation metrics from the training process
+    print("Verifying best model on validation set...")
+    trainer.evaluate(eval_dataset=dataset["validation"])
+    best_val_metrics = trainer.evaluate(eval_dataset=dataset["validation"])
 
     # Now, explicitly evaluate on the held-out test set
     print("Evaluating on the final test set...")
     test_metrics = trainer.evaluate(eval_dataset=dataset["test"])
     print(f"Test metrics: {test_metrics}")
 
+        # Helper to get dataset counts safely
+    def get_count(split_name):
+        return len(dataset[split_name]) if split_name in dataset else 0
+
+    # --- UNIFIED REPORT STRUCTURE ---
+    experiment_report = {
+        "experiment_id": f"EXP-{model_name}-{os.urandom(2).hex()}",
+        "model_type": model_name,
+        
+        # 1. THE RECIPE (Formerly 'training_config')
+        "best_validation_metrics": best_val_metrics,
+        "training_config": {
+            "learning_rate": learning_rate,
+            "epochs": epochs,
+            "train_batch_size": train_batch_size,
+            "eval_batch_size": eval_batch_size,
+            "gradient_accumulation_steps": grad_accum,
+            "weight_decay": weight_decay,
+            "warmup_steps": warmup_steps,
+            "dropout": dropout,
+            "device": str(device),
+        },
+
+        # 2. THE DATASET INFO
+        "dataset_config": {
+            "num_labels": len(label_encoder.classes_),
+            "label_classes": label_encoder.classes_.tolist(),
+            "splitting_strategy": {
+                "training_count": get_count("train"),
+                "validation_count": get_count("validation"),
+                "test_count": get_count("test")
+            }
+        },
+
+        # 3. THE PHASES (Train -> Val -> Test)
+        "phases": {
+            "1_training": {
+                "status": "completed",
+                "metrics": {
+                    "final_training_loss": global_train_metrics.get("train_loss"),
+                    "total_runtime_seconds": global_train_metrics.get("train_runtime")
+                }
+            },
+            "2_validation": {
+                "purpose": "Model Selection",
+                "metrics": {
+                    "validation_loss": best_val_metrics.get("eval_loss"),
+                    "validation_f1": best_val_metrics.get("eval_f1"),
+                    "validation_accuracy": best_val_metrics.get("eval_accuracy")
+                }
+            },
+            "3_testing": {
+                "purpose": "Real-world Simulation",
+                "metrics": {
+                    "test_loss": test_metrics.get("eval_loss"),
+                    "test_accuracy": test_metrics.get("eval_accuracy"),
+                    "test_f1": test_metrics.get("eval_f1"),
+                    "test_precision": test_metrics.get("eval_precision"),
+                    "test_recall": test_metrics.get("eval_recall")
+                }
+            }
+        },
+
+        # 4. GENERAL EVALUATION SUMMARY
+        "general_evaluation": {
+            "summary": "Combined performance metrics and configuration.",
+            "deployment_decision": "APPROVED" if test_metrics.get("eval_f1", 0) > 0.8 else "NEEDS_REVIEW"
+        }
+    }
+
+    
+    save_training_config(experiment_report, str(save_path))
+
     return {
-        "train": best_validation_metrics,
-        "eval": test_metrics
+        "validation": best_val_metrics,
+        "test": test_metrics
     }
 
     """

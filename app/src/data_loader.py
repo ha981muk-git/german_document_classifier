@@ -13,8 +13,12 @@ from transformers import PreTrainedTokenizer
 
 from .utils import save_label_encoder
 
-os.environ["WANDB_DISABLED"] = "true"
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
+# Unless plan to actively use Weights & Biases for experiment tracking
+os.environ["WANDB_DISABLED"] = "true" # Disable Weights & Biases logging
+
+# Can use multiple processor cores to tokenize,
+# Leave it like this, Stability is more important than a minor speed-up in tokenization
+os.environ["TOKENIZERS_PARALLELISM"] = "false" # Disable parallelism in tokenizers to avoid warnings and potential issues
 
 def load_and_prepare_data(csv_path: str,
                           label_classes_output: Optional[str]=None,

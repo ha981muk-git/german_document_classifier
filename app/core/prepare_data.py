@@ -1,11 +1,11 @@
 import sys
+
 from pathlib import Path
 from typing import Dict, List
 import pandas as pd
 
-
 from app.core.paths import  PROCESSED_DIR, RAW_DIR, SYNTHETIC_DIR
-from app.src.utils import extract_pdf, clean_text
+from app.core.utils import extract_pdf, clean_text
 
 
 def read_text_file(path: Path) -> str:

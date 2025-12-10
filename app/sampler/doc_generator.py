@@ -3,10 +3,10 @@ German Business Document Generator - Enhanced Version
 Generates 10-15 different variations per document type for robust model training
 """
 
-import pandas as pd
-from datetime import datetime, timedelta
 import random
+import pandas as pd
 from pathlib import Path
+from datetime import datetime, timedelta
 from sklearn.utils import resample
 
 class GermanDocumentGenerator:

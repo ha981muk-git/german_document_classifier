@@ -1,12 +1,17 @@
-from typing import Any, Dict, Optional
-from pathlib import Path
+
 import torch, os,json
-from transformers import AutoModelForSequenceClassification, AutoConfig, TrainingArguments, Trainer, DataCollatorWithPadding
-from .data_loader import load_and_prepare_data, tokenize_dataset
+
+from pathlib import Path
+from typing import Any, Dict, Optional
+
 from sklearn.metrics import precision_recall_fscore_support
 from transformers import EarlyStoppingCallback
-from .utils import save_training_config
+from transformers import AutoModelForSequenceClassification, AutoConfig, TrainingArguments, Trainer, DataCollatorWithPadding
+
+from app.core.data_loader import load_and_prepare_data, tokenize_dataset
+from app.core.utils import save_training_config
 # Device detection
+
 device = (
     torch.device("cuda") if torch.cuda.is_available() else
     torch.device("mps") if torch.backends.mps.is_available() else

@@ -8,12 +8,14 @@
 
 import torch
 import numpy as np
-from transformers import AutoModelForSequenceClassification
-from .data_loader import load_and_prepare_data, tokenize_dataset
+import pandas as pd
 from typing import Dict, Optional
 from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
 from sklearn.metrics import precision_recall_fscore_support
+from transformers import AutoModelForSequenceClassification
+
+from app.core.data_loader import load_and_prepare_data, tokenize_dataset
 
 # Device detection
 device = (

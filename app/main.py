@@ -9,21 +9,23 @@ os.environ["WANDB_DISABLED"] = "true" # Disable Weights & Biases logging
 # Leave it like this, Stability is more important than a minor speed-up in tokenization
 os.environ["TOKENIZERS_PARALLELISM"] = "false" # Disable parallelism in tokenizers to avoid warnings and potential issues
 
-from pathlib import Path
-import yaml
-import pandas as pd
-from collections import defaultdict
 
-from core.paths import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, SYNTHETIC_DIR
-from sampler.make_synthetic_data import SyntheticDocumentGenerator
-from src.prepare_data import process_dataset
-from src.train import train_model
-from sampler.doc_generator import save_all_synthetic_as_text_files
-from src.evaluate import evaluate_model
+import yaml
 import json
 import argparse
-from datetime import datetime
+import pandas as pd
 
+from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+
+from app.sampler.make_synthetic_data import SyntheticDocumentGenerator
+from app.sampler.doc_generator import save_all_synthetic_as_text_files
+
+from app.core.paths import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, SYNTHETIC_DIR
+from app.core.evaluate import evaluate_model
+from app.core.prepare_data import process_dataset
+from app.core.train import train_model
 
 # -----------------------------
 # Helpers

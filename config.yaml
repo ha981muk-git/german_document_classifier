@@ -10,27 +10,27 @@ label_map:
 models_to_train:
   # --- High Performance (Standard) ---
   # "The Optimized One": Best general performance, Whole Word Masking. ~440MB
-  - "deepset/gbert-base"
+  #- "deepset/gbert-base"
 
   # "The Classic Baseline": The standard German BERT by MDZ. Very common. ~440MB
-  - "dbmdz/bert-base-german-cased"
+  #- "dbmdz/bert-base-german-cased"
 
   # "Legacy/Generic": Often refers to the older Deepset model. ~440MB
   - "bert-base-german-cased"
 
   # --- Architecturally Different ---
   # "The Efficient One": Uses ELECTRA (Discriminator/Generator). Good efficiency. ~440MB
-  - "deepset/gelectra-base"
+  #- "deepset/gelectra-base"
 
   # "The Fast One": Distilled model. Smallest (~270MB), fastest speed, lower costs.
   - "distilbert-base-german-cased"
 
   # "The Big Data One": RoBERTa architecture. Trained on massive OSCAR dataset. ~500MB
-  - "uklfr/gottbert-base"
+  #- "uklfr/gottbert-base"
 
 training:
   learning_rate: 3.0e-5
-  epochs: 10
+  epochs: 1
 
 synthetic_data:
   per_category_v0: 200

@@ -1,8 +1,10 @@
 # data_loader.py
-from pathlib import Path
+import torch
+
 import numpy as np
 import pandas as pd
-import torch
+from pathlib import Path
+
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from datasets import Dataset, DatasetDict
@@ -10,7 +12,7 @@ from transformers import AutoTokenizer
 from typing import Optional, Tuple
 from transformers import PreTrainedTokenizer
 
-from .utils import save_label_encoder
+from app.core.utils import save_label_encoder
 
 def load_and_prepare_data(csv_path: str,
                           label_classes_output: Optional[str]=None,

@@ -1,17 +1,20 @@
-from pathlib import Path
-import torch
-import numpy as np
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from PIL import Image
 import fitz  # PyMuPDF
 import pytesseract
 import re
 import io
 import mimetypes
+import torch
 import docx  # for DOCX files
+
+import numpy as np
+from pathlib import Path
 from typing import Dict, Any
 from pathlib import Path
-from .utils import clean_text, extract_pdf, load_label_encoder
+from PIL import Image
+
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+from app.core.utils import clean_text, extract_pdf, load_label_encoder
 from app.core.paths import PROJECT_ROOT
 
 # Device detection

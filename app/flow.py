@@ -1,4 +1,5 @@
 import os
+import yaml
 
 # Set environment variables for Hugging Face libraries before any other imports
 
@@ -9,11 +10,11 @@ os.environ["WANDB_DISABLED"] = "true" # Disable Weights & Biases logging
 # Leave it like this, Stability is more important than a minor speed-up in tokenization
 os.environ["TOKENIZERS_PARALLELISM"] = "false" # Disable parallelism in tokenizers to avoid warnings and potential issues
 
-from metaflow import FlowSpec, step, Parameter
-from src.train import train_model  
 from pathlib import Path
-from core.paths import PROJECT_ROOT, PROCESSED_DIR
-import yaml
+from metaflow import FlowSpec, step, Parameter
+
+from app.core.train import train_model  
+from app.core.paths import PROJECT_ROOT, PROCESSED_DIR
 
 class GermanModelFlow(FlowSpec):
 

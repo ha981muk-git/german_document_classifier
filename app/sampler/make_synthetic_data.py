@@ -1,7 +1,7 @@
+import random
 from pathlib import Path
 from typing import Optional, Sequence
 from faker import Faker
-import random
 
 
 class SyntheticDocumentGenerator:

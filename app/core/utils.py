@@ -1,15 +1,16 @@
 # utils.py
-import re
-from pathlib import Path
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
 import json
-
 import fitz  # PyMuPDF
 import sys
 import pytesseract
 import io
+import re
+
 from PIL import Image
+from pathlib import Path
+import numpy as np
+from sklearn.preprocessing import LabelEncoder
+
 
 # ---------------------------
 # CLEAN TEXT (shared)

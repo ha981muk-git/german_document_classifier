@@ -17,7 +17,7 @@ All installation steps, architecture explanations, and usage instructions from t
 
 ### **Clone the Repository**
 
-Run the following commands in a Colab cell to clone the project and navigate into the directory:
+Run the following commands in a Colab/Kaggle cell to clone the project and navigate into the directory:
 
 ```bash
 !git clone https://github.com/ha981muk-git/german_document_classifier.git
@@ -159,7 +159,11 @@ german_document_classifier/
 │   │   └── api.py
 │   │
 │   ├── core/
-│   │   └── paths.py
+│   │   ├── evaluate.py
+│   │   ├── paths.py
+│   │   ├── prepare_data.py
+│   │   ├── predict.py
+│   │   └── train.py
 │   │
 │   ├── data/
 │   │   └── (data files not shown)
@@ -167,13 +171,6 @@ german_document_classifier/
 │   ├── sampler/
 │   │   ├── doc_generator.py
 │   │   └── make_synthetic_data.py
-│   │
-│   ├── src/
-│   │   ├── data_loader.py
-│   │   ├── train.py
-│   │   ├── evaluate.py
-│   │   ├── predict.py
-│   │   └── utils.py
 │   │
 │   ├── static/
 │   │   ├── index.html
@@ -263,7 +260,7 @@ This separation of concerns improves the reproducibility and maintainability of 
 
 ## **A.3 Data Processing Layer**
 
-**Module:** `app/src/data_loader.py`
+**Module:** `app/core/prepare_data.py`
 
 Responsibilities:
 
@@ -281,7 +278,7 @@ This design ensures consistency between training, evaluation, and inference.
 
 ## **A.4 Model Training Layer**
 
-**Module:** `app/src/train.py`
+**Module:** `app/core/train.py`
 
 The training subsystem implements:
 
@@ -300,7 +297,7 @@ All training parameters are stored in a `training_config.json` file to ensure fu
 
 ## **A.5 Evaluation Layer**
 
-**Module:** `app/src/evaluate.py`
+**Module:** `app/core/evaluate.py`
 
 The evaluation pipeline:
 
@@ -358,7 +355,7 @@ start → train_each_model (foreach) → join → end
 
 ## **A.8 Inference Layer (DocumentClassifier)**
 
-**Module:** `app/src/predict.py`
+**Module:** `app/core/predict.py`
 
 The inference engine provides a unified abstraction for document classification.
 It supports multiple input formats:

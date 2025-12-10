@@ -7,18 +7,48 @@ This document provides a clean, professional structure for developers working on
 All installation steps, architecture explanations, and usage instructions from the original text are preserved and reorganized.
 
 
-
 ---
 
-# **1. 🚀 Getting Started**
+# **0.0 🚀 Getting Started**
 
-## **1.1 Prerequisites**
+
+
+# **1.0 Running in Google Colab / Kaggle**
+
+### **Clone the Repository**
+
+Run the following commands in a Colab cell to clone the project and navigate into the directory:
+
+```bash
+!git clone https://github.com/ha981muk-git/german_document_classifier.git
+%cd german_document_classifier
+```
+
+### **Install Dependencies**
+
+```bash
+!pip install uv
+!uv pip install --system -r pyproject.toml
+```
+
+
+
+### **Fine-Tune the BERT Model**
+
+Execute the main script to start the fine-tuning process:
+
+```bash
+!python -m app.main --train
+```
+
+# **2.0 🛠️ Installation ( Local Development)**
+## **Prerequisites**
 
 ### **Before Cloning the Repository**
 
 
 
-Ensure you have uv installed.
+Ensure you have **uv** installed.
 ```bash
 # MacOS/Linux
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -27,9 +57,6 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 ---
-
-# **2. 🛠️ Installation (Colab / Local Development)**
-
 ## **2.1 Clone the repository**
 
 ```bash
@@ -40,9 +67,13 @@ cd german_document_classifier
 ## **2.2 Create virtual environment**
 
 ```bash
-uv init . 
-uv sync 
+uv sync
+
+# MacOS/Linux
 source .venv/bin/activate
+
+# Windows
+.venv\Scripts\activate
 ```
 ---
 
@@ -53,7 +84,7 @@ source .venv/bin/activate
 python -m  app.main --generate
 ```
 
-### **2.4 Prepare CSV File  For Datesets Training (Optional)**
+### **2.4 Prepare CSV File  For Datasets Training (Optional)**
 
 ```bash
 python -m app.main --prepare
@@ -106,7 +137,7 @@ curl -X POST http://127.0.0.1:8000/predict \
 ### **2.8 Hyperparameter Searching**
 
 ```bash
-python app/hyperparamsearch.py
+python -m app.hyperparamsearch
 ```
 
 ## **3. 📁 Project Structure**

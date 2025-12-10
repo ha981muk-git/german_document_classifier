@@ -17,8 +17,8 @@ import yaml
 import pandas as pd
 from pathlib import Path
 
-from core.paths import PROJECT_ROOT, PROCESSED_DIR
-from core.train import train_model
+from app.core.paths import PROJECT_ROOT, PROCESSED_DIR
+from app.core.train import train_model
 
 CSV_PATH = PROCESSED_DIR / "all_data.csv"
 

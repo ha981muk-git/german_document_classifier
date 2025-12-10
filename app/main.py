@@ -1,7 +1,7 @@
 import os, sys
 
 # First app import to ensure PROJECT_ROOT is added to sys.path
-from core.paths import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, SYNTHETIC_DIR
+from app.core.paths import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, SYNTHETIC_DIR
 
 # Set environment variables for Hugging Face libraries before any other imports
 

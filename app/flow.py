@@ -13,8 +13,9 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false" # Disable parallelism in tokenize
 from pathlib import Path
 from metaflow import FlowSpec, step, Parameter
 
-from core.train import train_model
-from core.paths import  PROCESSED_DIR
+from app.core.paths import PROJECT_ROOT, PROCESSED_DIR
+from app.core.train import train_model
+
 
 class GermanModelFlow(FlowSpec):
 

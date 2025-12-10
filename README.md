@@ -42,7 +42,7 @@ and
 Execute the main script to start the fine-tuning process:
 
 ```bash
-!python app/main.py --train
+!python -m app.main --train
 ```
 
 ---
@@ -68,25 +68,25 @@ conda activate doc-classifier-env
 ### **2.3 Synthetic Data Generation (Optional)**
 
 ```bash
-python app/main.py --generate
+python -m  app.main --generate
 ```
 
 ### **2.4 Prepare CSV File  For Datesets Training (Optional)**
 
 ```bash
-python app/main.py --prepare
+python -m app.main --prepare
 ```
 
 ## **2.5 Training the BERT Models**
 
 ```bash
-python app/main.py --train
+python -m app.main --train
 ```
 
 ## **2.6 Alternatively Generate, Prepare and Training the BERT Models (All At Once)**
 
 ```bash
-python app/main.py --all
+python -m app.main --all
 ```
 
 ## **2.7 FastAPI Web Server**

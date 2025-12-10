@@ -12,42 +12,23 @@ All installation steps, architecture explanations, and usage instructions from t
 
 # **1. 🚀 Getting Started**
 
-## **1.1 Running in Google Colab**
+## **1.1 Prerequisites**
 
-### **Clone the Repository**
+### **Before Cloning the Repository**
 
-Run the following commands in a Colab cell to clone the project and navigate into the directory:
 
+
+Ensure you have uv installed.
 ```bash
-!git clone https://github.com/ha981muk-git/german_document_classifier.git
-%cd german_document_classifier
+# MacOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
-
-### **Install Dependencies (Optional)**
-
-Most required packages are already available in Google Colab, but if needed, you can install the remaining ones:
-!pip install --upgrade-strategy only-if-needed -r requirements.txt
-```bash
-!pip install faker pytesseract
-```
-and 
-```bash
-!pip install --upgrade-strategy only-if-needed -r requirements.txt
-```
-
-
-
-### **Fine-Tune the BERT Model**
-
-Execute the main script to start the fine-tuning process:
-
-```bash
-!python -m app.main --train
-```
-
 ---
 
-# **2. 🛠️ Installation (Local Development)**
+# **2. 🛠️ Installation (Colab / Local Development)**
 
 ## **2.1 Clone the repository**
 
@@ -59,8 +40,9 @@ cd german_document_classifier
 ## **2.2 Create virtual environment**
 
 ```bash
-conda env create -f environment.yaml
-conda activate doc-classifier-env
+uv init . 
+uv sync 
+source .venv/bin/activate
 ```
 ---
 

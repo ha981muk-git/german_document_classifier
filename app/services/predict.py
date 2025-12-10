@@ -1,3 +1,5 @@
+from app.core.paths import PROJECT_ROOT
+
 import fitz  # PyMuPDF
 import pytesseract
 import re
@@ -15,7 +17,7 @@ from PIL import Image
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 from app.core.utils import clean_text, extract_pdf, load_label_encoder
-from app.core.paths import PROJECT_ROOT
+
 
 # Device detection
 device = (

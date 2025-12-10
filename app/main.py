@@ -1,4 +1,7 @@
-import os
+import os, sys
+
+# This MUST be the first app import to ensure PROJECT_ROOT is added to sys.path
+from core.paths import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, SYNTHETIC_DIR
 
 # Set environment variables for Hugging Face libraries before any other imports
 
@@ -19,10 +22,9 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
-from app.sampler.make_synthetic_data import SyntheticDocumentGenerator
+from app.sampler.make_synthetic_data import SyntheticDocumentGenerator 
 from app.sampler.doc_generator import save_all_synthetic_as_text_files
 
-from app.core.paths import PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, SYNTHETIC_DIR
 from app.core.evaluate import evaluate_model
 from app.core.prepare_data import process_dataset
 from app.core.train import train_model

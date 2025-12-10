@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Dict, List
 import pandas as pd
 
-from app.core.paths import  PROCESSED_DIR, RAW_DIR, SYNTHETIC_DIR
 from app.core.utils import extract_pdf, clean_text
 
 

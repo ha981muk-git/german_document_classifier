@@ -4,12 +4,9 @@ from pathlib import Path
 # --------------------------------------------------------
 # Project Root
 # --------------------------------------------------------
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-
-# Make project importable (optional but safe)
 if str(PROJECT_ROOT) not in sys.path:
-    sys.path.append(str(PROJECT_ROOT))
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 # --------------------------------------------------------
 # Directory Structure

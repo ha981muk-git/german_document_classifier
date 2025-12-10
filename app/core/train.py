@@ -138,6 +138,7 @@ def train_model(
         fp16=use_fp16,
         gradient_checkpointing=(device.type == "cuda"),
         report_to="none",
+        dataloader_pin_memory=(device.type != "mps"),# Disable pin_memory on Mac (MPS) to stop the warning
     )
 
     early_stopping = EarlyStoppingCallback(

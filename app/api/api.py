@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from app.core.paths import PROJECT_ROOT, APP_DIR
-from app.core.predict import DocumentClassifier
+from app.services.predict import DocumentClassifier
 
 
 app = FastAPI()

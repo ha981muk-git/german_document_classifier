@@ -1,4 +1,4 @@
-from app.core.paths import PROJECT_ROOT
+
 
 import fitz  # PyMuPDF
 import pytesseract
@@ -16,6 +16,7 @@ from PIL import Image
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
+from app.core.paths import PROJECT_ROOT
 from app.core.utils import clean_text, extract_pdf, load_label_encoder
 
 

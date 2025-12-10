@@ -1,5 +1,3 @@
-from app.core.paths import  PROJECT_ROOT, APP_DIR
-
 import uuid
 import tempfile
 import shutil
@@ -12,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
+from app.core.paths import  PROJECT_ROOT, APP_DIR
 from app.services.predict import DocumentClassifier
 
 

@@ -23,7 +23,7 @@ models_to_train:
   #- "deepset/gelectra-base"
 
   # "The Fast One": Distilled model. Smallest (~270MB), fastest speed, lower costs.
-  - "distilbert-base-german-cased"
+  #- "distilbert-base-german-cased"
 
   # "The Big Data One": RoBERTa architecture. Trained on massive OSCAR dataset. ~500MB
   #- "uklfr/gottbert-base"

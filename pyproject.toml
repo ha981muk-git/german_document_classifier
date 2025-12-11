@@ -58,3 +58,6 @@ dependencies = [
     "wandb==0.18.5",
     "zstandard==0.25.0",
 ]
+
+[tool.setuptools]
+packages = ["app"]

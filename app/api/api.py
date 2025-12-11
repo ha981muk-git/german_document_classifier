@@ -1,4 +1,4 @@
-import uuid
+import uuid, os
 import tempfile
 import shutil
 import mimetypes
@@ -41,6 +41,13 @@ async def read_index():
 
 # Load available models automatically
 MODEL_DIR = PROJECT_ROOT / "models"
+
+# Check if the directory exists before trying to load
+if not os.path.isdir(MODEL_DIR):
+    raise RuntimeError(f"Model directory not found at '{MODEL_DIR}'")
+
+# Now load your model from MODEL_DIR
+# e.g., model = YourModelLoader.load(MODEL_DIR)
 
 def get_available_models() -> list[str]:
     return [d.name for d in MODEL_DIR.iterdir() if d.is_dir()]

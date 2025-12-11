@@ -46,8 +46,6 @@ Execute the main script to start the fine-tuning process:
 
 ### **Before Cloning the Repository**
 
-
-
 Ensure you have **uv** installed.
 ```bash
 # MacOS/Linux

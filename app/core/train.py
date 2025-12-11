@@ -42,7 +42,7 @@ def get_sensible_batch_sizes(device, user_train_batch=None, user_eval_batch=None
         if device.type == "cuda":
             return 4, 8, 2, True
         elif device.type == "mps":
-            return 4, 8, 2, False
+            return 4, 4, 2, False
         else:
             return 2, 4, 4, False
     else:
@@ -136,7 +136,8 @@ def train_model(
         greater_is_better=True,
 
         fp16=use_fp16,
-        gradient_checkpointing=(device.type == "cuda"),
+        #gradient_checkpointing=(device.type == "cuda"),
+        gradient_checkpointing=True,
         report_to="none",
         dataloader_pin_memory=(device.type != "mps"),# Disable pin_memory on Mac (MPS) to stop the warning
     )

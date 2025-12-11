@@ -28,7 +28,7 @@ device = (
 )
 
 # Get APP_DIR (one level up from src/)
-PREDICTION_MODEL = PROJECT_ROOT / "models" / "dbmdz_bert-base-german-cased"
+PREDICTION_MODEL = PROJECT_ROOT / "models" / "bert-base-german-cased"
 
 
 class DocumentClassifier:

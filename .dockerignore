@@ -1,0 +1,28 @@
+# .dockerignore
+app/data/
+
+requirements.txt
+__pycache__
+# strictly allow the specific model we want to copy:
+app/__pycache__/
+app/*/__pycache__/
+# .dockerignore
+
+# Ignore git history
+.git
+.gitignore
+
+# Ignore Python cache
+__pycache__
+*.pyc
+
+# CRITICAL: Ignore local virtual environments
+venv/
+.venv/
+
+# Ignore large data/models (Use Volume Mounts instead)
+data/
+
+!app/services/predict.py
+!app/api/api.py 
+!app/core/paths.py

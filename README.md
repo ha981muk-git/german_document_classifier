@@ -126,6 +126,20 @@ curl -X POST http://127.0.0.1:8000/predict \
 ### Open the UI:
 👉 http://localhost:8000
 
+## **2.8 🐳 Running with Docker (Alternative)**
+
+For easier dependency management and deployment, you can build and run the entire application using Docker. This is the recommended way to run the service in production.
+
+### **Build the Docker Image**
+
+```bash
+docker build -t german-document-classifier .
+```
+
+### **Run the Docker Container**
+```bash
+docker run -p 8000:8000 german-document-classifier
+```
 ### Allows:
 
 1. **✔ Uploading PDFs, images:** `classifier.predict_file` extracts text via OCR/loader logic before inference.
@@ -134,7 +148,7 @@ curl -X POST http://127.0.0.1:8000/predict \
 
 
 
-### **2.8 Hyperparameter Searching**
+### **2.9 Hyperparameter Searching**
 
 ```bash
 python -m app.hyperparamsearch

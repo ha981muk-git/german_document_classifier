@@ -29,3 +29,15 @@ evaluation_results_20251204_213215.json
 .readme.md
 .vscode/
 config.yaml
+
+# Bugs related files
+"Icon\r"
+"app/Icon\r"
+"app/api/Icon\r"
+"app/core/Icon\r"
+"app/data/Icon\r"
+"app/data/processed/Icon\r"
+"app/notebooks/Icon\r"
+"app/sampler/Icon\r"
+"app/services/Icon\r"
+"app/static/Icon\r"

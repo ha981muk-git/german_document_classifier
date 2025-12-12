@@ -126,7 +126,7 @@ curl -X POST http://127.0.0.1:8000/predict \
 
 ## **2.8 🐳 Running with Docker (Alternative)**
 
-For easier dependency management and deployment, you can build and run the entire application using Docker. This is the recommended way to run the service in production.
+For easier dependency management and deployment, you can build and run the entire application using Docker. This is the recommended way to run the service in production. But you need to train and get the model first for testing the model.
 
 ### **Build the Docker Image**
 

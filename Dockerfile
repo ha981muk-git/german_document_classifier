@@ -19,9 +19,14 @@ RUN pip install --no-cache-dir uvicorn
 
 # Dependencies Layer --no-dev 
 COPY pyproject.toml uv.lock* /srv/
-RUN uv sync --frozen --no-install-project --no-dev || \
-    uv pip install --system $(python -c "import tomllib; print(' '.join(tomllib.load(open('pyproject.toml', 'rb'))['project']['dependencies']))")
 
+# Install dependencies with pip via uv
+#    '--system' to install into the main Python environment
+#    '--extra-index-url' to find CPU versions of Torch
+#    '-r pyproject.toml' so uv reads requirements directly 
+RUN uv pip install --system --no-cache \
+    --extra-index-url https://download.pytorch.org/whl/cpu \
+    -r pyproject.toml
 # Application Code Layer
 # Because of .dockerignore, this will NOW only copy the files we want
 COPY . /srv/
@@ -32,9 +37,9 @@ RUN uv pip install --system .
 ENV PYTHONPATH=/srv
 ENV PATH="/srv/.venv/bin:$PATH"
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD ["uvicorn", "app.api.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.api.api:app", "--host", "0.0.0.0", "--port", "8080"]
 
 #COPY ./models/bert-base-german-cased/ /srv/models/bert-base-german-cased/
 
@@ -52,6 +57,6 @@ CMD ["uvicorn", "app.api.api:app", "--host", "0.0.0.0", "--port", "8000"]
 # curl http://localhost:8000/models
 
 
-# docker build -t myapp:latest .
+# docker build --platform linux/amd64 -t myapp . # testing in digital ocean or other linux platforms
 # docker tag myapp:latest usr6706/myapp:latest
 # docker push usr6706/myapp:latest

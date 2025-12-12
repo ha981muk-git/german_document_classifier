@@ -15,7 +15,7 @@ RUN apt-get update && \
 
 # Install UV
 # Pin the version of uv for reproducible builds, 0.1.41
-COPY --from=ghcr.io/astral-sh/uv:0.1.41 /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 # Dependencies Layer --no-dev 
 COPY pyproject.toml uv.lock* /srv/
@@ -37,9 +37,9 @@ RUN uv pip install --system --no-deps .
 ENV PYTHONPATH=/srv
 
 # Create non-root user for security
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /srv
+#RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /srv
 
-USER appuser
+#USER appuser
 
 
 EXPOSE 8080
@@ -62,6 +62,6 @@ CMD ["uvicorn", "app.api.api:app", "--host", "0.0.0.0", "--port", "8080"]
 # curl http://localhost:8080/models
 
 
-# docker build --platform linux/amd64 -t myapp . # testing in digital ocean or other linux platforms
+# docker build --no-cache --platform linux/amd64 -t myapp . # testing in digital ocean or other linux platforms
 # docker tag myapp:latest usr6706/myapp:latest
 # docker push usr6706/myapp:latest

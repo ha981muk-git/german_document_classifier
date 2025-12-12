@@ -10,8 +10,8 @@
 !app/static/**
 
 # Whitelist models
-!models/bert-base-german-cased/*
-models/bert-base-german-cased/checkpoint-*
+!models/*/*
+models/*/checkpoint*
 
 # Allow config & dependencies
 !requirements.txt

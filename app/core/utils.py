@@ -6,6 +6,9 @@ import pytesseract
 import io
 import re
 
+import pillow_heif
+pillow_heif.register_heif_opener()
+
 from PIL import Image
 from pathlib import Path
 import numpy as np
@@ -64,7 +67,7 @@ def extract_pdf(pdf_path: str) -> str:
                     # Render page as an image
                     pix = page.get_pixmap(dpi=300)
                     img = Image.open(io.BytesIO(pix.tobytes()))
-                    
+                    img = img.convert("RGB") # Ensure compatibility with pytesseract
                     # Perform OCR (assuming German based on your previous context)
                     ocr_text = pytesseract.image_to_string(img, lang='deu')
                     full_text += ocr_text

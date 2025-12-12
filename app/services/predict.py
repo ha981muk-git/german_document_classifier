@@ -8,6 +8,9 @@ import mimetypes
 import torch
 import docx  # for DOCX files
 
+import pillow_heif
+pillow_heif.register_heif_opener()
+
 import numpy as np
 from pathlib import Path
 from typing import Dict, Any
@@ -50,6 +53,7 @@ class DocumentClassifier:
     # -----------------------
     def extract_text_from_image(self, image_path: str) -> str:
         img = Image.open(image_path)
+        img = img.convert("RGB") 
         try:
             return pytesseract.image_to_string(img, lang="deu")
         except:
@@ -71,7 +75,10 @@ class DocumentClassifier:
         mime, _ = mimetypes.guess_type(file_path)
 
         if mime is None:
-            raise ValueError("Unknown file type")
+            if file_path.lower().endswith(('.heic', '.heif')):
+                return self.extract_text_from_image(file_path)
+            raise ValueError(f"Unknown file type for {file_path}")
+
 
         # --- PDF ---
         if mime == "application/pdf":

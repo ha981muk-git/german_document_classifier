@@ -13,35 +13,41 @@ RUN apt-get update && \
         curl && \
     rm -rf /var/lib/apt/lists/*
 
-# Install UV
+# Install UV and uvicorn
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
-RUN pip install --no-cache-dir uvicorn
 
-# Dependencies Layer --no-dev 
+# Dependencies Layer (copied before application code for better caching)
 COPY pyproject.toml uv.lock* /srv/
 
-# Install dependencies with pip via uv
-#    '--system' to install into the main Python environment
-#    '--extra-index-url' to find CPU versions of Torch
-#    '-r pyproject.toml' so uv reads requirements directly 
+# Install dependencies with uv
+# '--system' installs into the main Python environment (no venv needed in containers)
+# '--extra-index-url' finds CPU versions of PyTorch
 RUN uv pip install --system --no-cache \
     --extra-index-url https://download.pytorch.org/whl/cpu \
-    -r pyproject.toml
+    -r pyproject. toml
+
 # Application Code Layer
-# Because of .dockerignore, this will NOW only copy the files 
+# . dockerignore ensures only necessary files are copied
 COPY . /srv/
 
-# Install the package (Removed '-e')
-RUN uv pip install --system .
+# Install the package itself (--no-deps prevents reinstalling dependencies)
+RUN uv pip install --system --no-deps . 
 
+# Environment variables
 ENV PYTHONPATH=/srv
-ENV PATH="/srv/.venv/bin:$PATH"
+
+# Create non-root user for security
+RUN useradd -m -u 1000 appuser && \
+    chown -R appuser: appuser /srv
+USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
+    CMD curl -f http://localhost:8080/health || exit 1
 
 EXPOSE 8080
 
-CMD ["uvicorn", "app.api.api:app", "--host", "0.0.0.0", "--port", "8080"]
-
-#COPY ./models/bert-base-german-cased/ /srv/models/bert-base-german-cased/
+CMD ["uvicorn", "app.api. api:app", "--host", "0.0.0.0", "--port", "8080"]
 
 # docker build -t german-document-classifier .
 # docker run -p 8080:8080 german-document-classifier
@@ -50,6 +56,7 @@ CMD ["uvicorn", "app.api.api:app", "--host", "0.0.0.0", "--port", "8080"]
 
 # clean up failed builds and old images
 # docker system prune -a 
+
 # docker build -t german-classifier:debug .
 # docker build --no-cache -t german-classifier:debug .
 # docker run -it --rm german-classifier:debug /bin/bash

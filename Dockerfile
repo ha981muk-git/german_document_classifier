@@ -44,7 +44,7 @@ CMD ["uvicorn", "app.api.api:app", "--host", "0.0.0.0", "--port", "8080"]
 #COPY ./models/bert-base-german-cased/ /srv/models/bert-base-german-cased/
 
 # docker build -t german-document-classifier .
-# docker run -p 8000:8000 german-document-classifier
+# docker run -p 8080:8080 german-document-classifier
 # docker run -it --rm german-document-classifier /bin/bash
 
 
@@ -53,8 +53,8 @@ CMD ["uvicorn", "app.api.api:app", "--host", "0.0.0.0", "--port", "8080"]
 # docker build -t german-classifier:debug .
 # docker build --no-cache -t german-classifier:debug .
 # docker run -it --rm german-classifier:debug /bin/bash
-# docker run -p 8000:8000 german-classifier:debug
-# curl http://localhost:8000/models
+# docker run -p 8080:8080 german-classifier:debug
+# curl http://localhost:8080/models
 
 
 # docker build --platform linux/amd64 -t myapp . # testing in digital ocean or other linux platforms

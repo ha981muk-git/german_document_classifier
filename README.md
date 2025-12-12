@@ -106,23 +106,23 @@ The FastAPI service wraps the trained `DocumentClassifier` and exposes a single 
 
 Start the server :
 ```bash
-uvicorn app.api.api:app --reload --port 8000
+uvicorn app.api.api:app --reload --port 8080
 ```
 
 Send free‑form text for classification:
 ```bash
-curl -X POST http://127.0.0.1:8000/predict \
+curl -X POST http://127.0.0.1:8080/predict \
      -H "Content-Type: application/x-www-form-urlencoded" \
      -d "text=Dies ist eine deutsche Beispielrechnung."
 ```
 
 Send pdf for classification:
 ```bash
-curl -X POST http://127.0.0.1:8000/predict \
+curl -X POST http://127.0.0.1:8080/predict \
      -F "file=@app/data/data_raw/contracts/01_Vertrag.pdf;type=application/pdf"
 ```
 ### Open the UI:
-👉 http://localhost:8000
+👉 http://localhost:8080
 
 ## **2.8 🐳 Running with Docker (Alternative)**
 
@@ -136,7 +136,7 @@ docker build -t german-document-classifier .
 
 ### **Run the Docker Container**
 ```bash
-docker run -p 8000:8000 german-document-classifier
+docker run -p 8080:8080 german-document-classifier
 ```
 ### Allows:
 

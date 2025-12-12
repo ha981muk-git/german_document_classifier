@@ -55,10 +55,10 @@
     // Check if running on localhost or 127.0.0.1
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
         // Development setting (FastAPI default port)
-        API_BASE = "http://127.0.0.1:8000"; 
+        API_BASE = "http://127.0.0.1:8080"; 
     } else if (window.location.hostname === "0.0.0.0") {
         // Docker setting 
-        API_BASE = "http://0.0.0.0:8000";
+        API_BASE = "http://0.0.0.0:8080";
     } else {
         // Default to current origin
         API_BASE = window.location.origin;

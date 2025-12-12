@@ -28,7 +28,7 @@ RUN uv pip install --system --no-cache \
     --extra-index-url https://download.pytorch.org/whl/cpu \
     -r pyproject.toml
 # Application Code Layer
-# Because of .dockerignore, this will NOW only copy the files we want
+# Because of .dockerignore, this will NOW only copy the files 
 COPY . /srv/
 
 # Install the package (Removed '-e')

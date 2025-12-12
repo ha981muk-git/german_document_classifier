@@ -72,13 +72,16 @@ class DocumentClassifier:
     # Handles PDF, image, text, docx
     # -----------------------
     def extract_text_from_any(self, file_path: str)  -> str:
+        mimetypes.add_type("image/webp", ".webp")
         mime, _ = mimetypes.guess_type(file_path)
 
         if mime is None:
-            if file_path.lower().endswith(('.heic', '.heif')):
+            file_path_str = str(file_path).lower()
+            # Check for HEIC, WebP, and other common images that might be missed
+            if file_path_str.endswith(('.heic', '.heif', '.webp', '.jpg', '.jpeg', '.png', '.bmp', '.tiff')):
                 return self.extract_text_from_image(file_path)
+            
             raise ValueError(f"Unknown file type for {file_path}")
-
 
         # --- PDF ---
         if mime == "application/pdf":
@@ -94,7 +97,8 @@ class DocumentClassifier:
                 return f.read()
 
         # --- DOCX ---
-        if mime == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        if mime in ("application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/msword"):
             return self.extract_text_from_docx(file_path)
 
         # --- Add more file types here ---

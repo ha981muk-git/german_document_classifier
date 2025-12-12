@@ -5,30 +5,28 @@ description = "German document classifier using transformers and fastapi"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    #  Web API 
+    #  Web API
     "fastapi>=0.124.0",
     "uvicorn>=0.38.0",
     "python-multipart>=0.0.20", # For file uploads
-
-    #  Machine Learning / Transformers 
-    "torch>=2.5.0",             # Explicitly add torch 
+    #  Machine Learning / Transformers
+    "torch>=2.5.0",             # Explicitly add torch
     "transformers>=4.40.0",
     "scikit-learn>=1.7.2",
     "accelerate>=1.11.0",       # optimizing inference
     "evaluate>=0.4.2",          # metrics
-    
-    #  Document Processing / OCR 
+    #  Document Processing / OCR
     "PyMuPDF>=1.26.6",          # PDF extraction
     "pytesseract>=0.3.13",      # OCR
     "pillow-heif>=1.1.1",       # HEIC Image support
     "python-docx>=1.2.0",       # Word docs
     "puremagic>=1.30",          # Mime type detection
-
-    #  Utilities 
+    #  Utilities
     "tqdm>=4.66.5",             # Progress bars
     "wandb>=0.18.5",            # Logging experiments
     "sentry-sdk>=2.43.0",       # Error tracking
     "faker>=38.2.0",            # If you use it for tests
+    "python-magic>=0.4.27",      # File type detection
 ]
 
 [tool.setuptools]

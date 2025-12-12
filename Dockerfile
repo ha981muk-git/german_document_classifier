@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 WORKDIR /srv
 
@@ -33,6 +33,10 @@ COPY . /srv/
 
 # Install the package (Removed '-e')
 RUN uv pip install --system --no-deps .
+
+RUN apt-get update && apt-get install -y libmagic1 libmagic-dev
+RUN pip install python-magic pillow-heif
+
 
 ENV PYTHONPATH=/srv
 

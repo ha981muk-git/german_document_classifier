@@ -18,11 +18,29 @@ from sklearn.preprocessing import LabelEncoder
 # ---------------------------
 # CLEAN TEXT (shared)
 # ---------------------------
-def clean_text(text: str) -> str:
+def clean_text_for_bert(text: str) -> str:
+    #  Normalize Newlines/HTML (Standard cleaning)
     text = text.replace("\n", " ")
     text = re.sub(r"<[^>]+>", " ", text)
+
+    #  REMOVE FORM NOISE (Crucial Step)
+    
+    # Pattern A: Matches long sequences of dots or underscores (e.g., ".......", "_______")
+    # We replace them with a single space
+    text = re.sub(r'[._-]{2,}', ' ', text)
+    
+    # Pattern B: Matches "spaced out" lines often found in OCR forms (e.g., "_ _ _ _ _")
+    # This looks for an underscore followed by whitespace, repeated 2 or more times
+    text = re.sub(r'(?:_\s){2,}_?', ' ', text)
+
+    #  Filter allowed characters
+    # Note: We keep '.' in the allowed list for sentence endings, 
+    # but since ran Step 2, the long "....." lines are already gone
     text = re.sub(r"[^a-zA-Z0-9äöüÄÖÜß$€%.,\s-]", " ", text)
+
+    # 4. Collapse multiple spaces and trim
     text = re.sub(r"\s+", " ", text)
+    
     return text.lower().strip()
 
 # -----------------------

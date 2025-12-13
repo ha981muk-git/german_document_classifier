@@ -111,14 +111,15 @@ uvicorn app.api.api:app --reload --port 8080
 Send free‑form text for classification:
 ```bash
 curl -X POST http://127.0.0.1:8080/predict \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "text=Dies ist eine deutsche Beispielrechnung."
+     -F "model_name=bert-base-german-cased" \
+     -F "text=Dies ist eine deutsche Beispielrechnung."
 ```
 
 Send pdf for classification:
 ```bash
 curl -X POST http://127.0.0.1:8080/predict \
-     -F "file=@app/data/data_raw/contracts/01_Vertrag.pdf;type=application/pdf"
+     -F "model_name=bert-base-german-cased" \
+     -F "file=@app/data/raw/contracts/01_Vertrag.pdf"
 ```
 ### Open the UI:
 👉 http://localhost:8080

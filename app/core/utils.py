@@ -18,7 +18,7 @@ from sklearn.preprocessing import LabelEncoder
 # ---------------------------
 # CLEAN TEXT (shared)
 # ---------------------------
-def clean_text_for_bert(text: str) -> str:
+def clean_text(text: str) -> str:
     #  Normalize Newlines/HTML (Standard cleaning)
     text = text.replace("\n", " ")
     text = re.sub(r"<[^>]+>", " ", text)

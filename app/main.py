@@ -26,47 +26,8 @@ from app.sampler.make_synthetic_data import SyntheticDocumentGenerator
 from app.sampler.doc_generator import save_all_synthetic_as_text_files
 
 from app.core.evaluate import evaluate_model
-from app.core.prepare_data import process_dataset
+from app.core.prepare_data import prepare_datasets, combine_csv_files
 from app.core.train import train_model
-
-# -----------------------------
-# Helpers
-# -----------------------------
-
-def combine_csv_files(processed_dir: Path) -> Path:
-    """Combine all CSV files in PROCESSED_DIR into all_data.csv."""
-    if not processed_dir.exists():
-        raise FileNotFoundError(f"Processed directory not found: {processed_dir}")
-
-    csv_files = list(processed_dir.glob("*.csv"))
-
-    if not csv_files:
-        raise FileNotFoundError("No CSV files found in PROCESSED_DIR.")
-
-    output_csv = processed_dir / "all_data.csv"
-
-    if output_csv.exists():
-        print(f"Using existing combined CSV: {output_csv}")
-    else:
-        print(f"Combining {len(csv_files)} CSV files into {output_csv}...")
-        df_list = [pd.read_csv(f) for f in csv_files]
-        all_data = pd.concat(df_list, ignore_index=True)
-        all_data.to_csv(output_csv, index=False)
-        print(f"Created combined CSV: {output_csv}")
-
-    return output_csv
-
-
-def prepare_datasets(config: dict) -> None:
-    """Process raw and synthetic data into separate CSV files."""
-
-    raw_csv = Path(PROCESSED_DIR) / "raw_data.csv"
-    process_dataset(RAW_DIR, str(raw_csv), config["label_map"])
-
-    if SYNTHETIC_DIR is not None:
-        synthetic_csv = Path(PROCESSED_DIR) / "synthetic_data.csv"
-        process_dataset(SYNTHETIC_DIR, str(synthetic_csv), config["label_map"])
-
 
 # -----------------------------
 # Main Training Loop
@@ -100,11 +61,12 @@ def main() -> None:
     if args.prepare or args.all:
         print("PREPARING DATASETS")
         prepare_datasets(config)
+        print("Combining CSV files into a single dataset...")
+        combine_csv_files(Path(PROCESSED_DIR))
 
     if args.train or args.all:
         print("TRAINING MODELS")
-        processed_dir = Path(PROCESSED_DIR)
-        csv_path = combine_csv_files(processed_dir)
+        csv_path = Path(PROCESSED_DIR) / "all_data.csv"
 
         results = defaultdict(dict)
 

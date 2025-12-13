@@ -34,10 +34,6 @@ COPY . /srv/
 # Install the package (Removed '-e')
 RUN uv pip install --system --no-deps .
 
-RUN apt-get update && apt-get install -y libmagic1 libmagic-dev
-RUN pip install python-magic pillow-heif
-
-
 ENV PYTHONPATH=/srv
 
 # Create non-root user for security

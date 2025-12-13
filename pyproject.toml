@@ -25,9 +25,7 @@ dependencies = [
     "tqdm>=4.66.5",             # Progress bars
     "wandb>=0.18.5",            # Logging experiments
     "sentry-sdk>=2.43.0",       # Error tracking
-    "faker>=38.2.0",            # If you use it for tests
-    "python-magic>=0.4.27",      # File type detection
-]
+    "faker>=38.2.0",            # data generation for training
 
 [tool.setuptools]
 packages = ["app"]

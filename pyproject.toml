@@ -24,8 +24,9 @@ dependencies = [
     #  Utilities
     "tqdm>=4.66.5",             # Progress bars
     "wandb>=0.18.5",            # Logging experiments
-    "sentry-sdk>=2.43.0",       # Error tracking
-    "faker>=38.2.0"             # data generation for 
+    "sentry-sdk>=2.43.0",       # Error tracking             # data generation for
+    "faker>=38.2.0",
+    "seaborn>=0.13.2",
 ]
 
 [tool.setuptools]

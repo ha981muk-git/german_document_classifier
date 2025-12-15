@@ -41,3 +41,6 @@ config.yaml
 "app/sampler/Icon\r"
 "app/services/Icon\r"
 "app/static/Icon\r"
+
+# Results 
+results

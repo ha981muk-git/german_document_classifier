@@ -23,8 +23,10 @@ import sys
 # --- Configuration ---
 warnings.filterwarnings('ignore')
 # Use modern Seaborn theme
-sns.set_theme(style="whitegrid", context="paper", font_scale=1.2)
+sns.set_theme(style="whitegrid", context="paper", font_scale=1.5)
 
+# Use a serif font that is more common in academic papers
+plt.rcParams['font.family'] = 'serif'
 # --- Constants ---
 PROJECT_ROOT = Path(".")
 MODELS_DIR = PROJECT_ROOT / "models"
@@ -149,11 +151,11 @@ def load_experiment_data(model_dirs):
 
 def plot_f1_score_bar(df):
     """Generates a bar chart for F1 Score."""
-    fig, ax = plt.subplots(figsize=(12, 7))
+    fig, ax = plt.subplots(figsize=(12, 8))
     sns.barplot(data=df, x='Model', y='F1_Score', hue='Dataset', ax=ax, palette="viridis")
     min_f1 = df['F1_Score'].min()
     ax.set_ylim(max(0, min_f1 - 0.05), 1.01) # Zoom in slightly
-    ax.set_title('Model Performance (F1 Score)', fontweight='bold')
+    ax.set_title('Model Performance (F1 Score)', fontweight='bold', pad=15)
     
     # --- FIX BELOW: Removed ha='right' ---
     ax.tick_params(axis='x', rotation=45) 
@@ -164,9 +166,9 @@ def plot_f1_score_bar(df):
 
 def plot_loss_bar(df):
     """Generates a bar chart for Model Loss."""
-    fig, ax = plt.subplots(figsize=(12, 7))
+    fig, ax = plt.subplots(figsize=(12, 8))
     sns.barplot(data=df, x='Model', y='Loss', hue='Dataset', ax=ax, palette="magma")
-    ax.set_title('Model Loss (Lower is Better)', fontweight='bold')
+    ax.set_title('Model Loss (Lower is Better)', fontweight='bold', pad=15)
     
     # --- FIX BELOW: Removed ha='right' ---
     ax.tick_params(axis='x', rotation=45)
@@ -179,16 +181,16 @@ def plot_speed_bar(df):
     """Generates a bar chart for Inference Speed."""
     speed_df = df[df['Dataset'] == 'Test']
     if not speed_df.empty and speed_df['Samples_Per_Sec'].sum() > 0:
-        fig, ax = plt.subplots(figsize=(12, 7))
+        fig, ax = plt.subplots(figsize=(12, 8))
         sns.barplot(data=speed_df, x='Model', y='Samples_Per_Sec', ax=ax, color="skyblue", edgecolor='black')
-        ax.set_title('Inference Speed (Samples/Sec)', fontweight='bold')
+        ax.set_title('Inference Speed (Samples/Sec)', fontweight='bold', pad=15)
         
         # --- FIX BELOW: Removed ha='right' ---
         ax.tick_params(axis='x', rotation=45)
         
         plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
         for container in ax.containers:
-            ax.bar_label(container, fmt='%.0f', padding=3)
+            ax.bar_label(container, fmt='%.0f', padding=3, fontsize=12)
         save_fig(fig, "fig_bar_inference_speed.png")
 
 def plot_metrics_dashboard(df):
@@ -209,15 +211,15 @@ def plot_tradeoff_scatter(df):
         hue='Model', style='Model', s=300, palette='deep', ax=ax
     )
 
-    ax.set_title('Trade-off: Inference Speed vs Test F1 Score', fontsize=16, fontweight='bold')
+    ax.set_title('Trade-off: Inference Speed vs Test F1 Score', fontweight='bold', pad=20)
     ax.set_xlabel('Speed (Samples/Sec) - Higher is Better', fontweight='bold')
     ax.set_ylabel('F1 Score - Higher is Better', fontweight='bold')
     
     # Legend placement
     # Adjust legend to be cleanly placed at the bottom.
     # 'loc='upper center'' anchors the top of the legend box.
-    # 'bbox_to_anchor' places it relative to the plot axes. The y-value is lowered for more space.
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, fancybox=True, shadow=False, frameon=False, borderpad=1)
+    # 'bbox_to_anchor' places it relative to the plot axes. The y-value is lowered for more space.    
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=3, fancybox=True, shadow=False, frameon=False)
     
     save_fig(fig, "fig_scatter_speed_vs_f1.png")
 
@@ -230,13 +232,13 @@ def plot_single_comparison(df, metric, title, filename):
     sns.barplot(data=plot_df, x=metric, y='Model', hue='Dataset', 
                 ax=ax, palette='Paired', edgecolor='black', alpha=0.9)
     
-    ax.set_title(title, fontsize=16, fontweight='bold', pad=15)
+    ax.set_title(title, fontweight='bold', pad=15)
     ax.set_xlabel(metric.replace('_', ' '), fontweight='bold')
     
     # Label bars
     fmt = '%.1f' if plot_df[metric].max() > 10 else '%.4f'
     for container in ax.containers:
-        ax.bar_label(container, fmt=fmt, padding=3, fontsize=10)
+        ax.bar_label(container, fmt=fmt, padding=3, fontsize=12)
 
     # Zoom if F1/Acc
     if plot_df[metric].max() <= 1.0:
@@ -250,11 +252,11 @@ def plot_class_distribution(df_data):
     class_counts = df_data['label'].value_counts().reset_index()
     class_counts.columns = ['label', 'count']
     
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(12, 7))
     sns.barplot(data=class_counts, x='label', y='count', palette='husl', ax=ax, edgecolor='black')
     for p in ax.patches:
         ax.annotate(f'{int(p.get_height())}', (p.get_x() + p.get_width() / 2., p.get_height()),
-                    ha='center', va='bottom', xytext=(0, 5), textcoords='offset points')
+                    ha='center', va='bottom', xytext=(0, 5), textcoords='offset points', fontsize=12)
     ax.set_title('Document Class Distribution', fontsize=16, fontweight='bold')
     save_fig(fig, 'fig_dataset_class_distribution.png')
 
@@ -264,8 +266,7 @@ def plot_class_distribution(df_data):
         fig2, ax2 = plt.subplots(figsize=(14, 8))
         sns.boxplot(data=df_data, x='label', y='text_length', palette="Set2", ax=ax2)
         ax2.set_yscale('log')
-        ax2.set_title('Text Length Distribution (Log Scale)', fontsize=16, fontweight='bold')
-        ax2.set_title('Text Length Distribution by Class', fontsize=16, fontweight='bold')
+        ax2.set_title('Text Length Distribution by Class (Log Scale)', fontsize=16, fontweight='bold')
         ax2.set_ylabel('Text Length (Characters)')
         save_fig(fig2, 'fig_dataset_text_length_by_class.png')
 
@@ -288,7 +289,7 @@ def plot_confusion_matrix(report_path, model_name):
             sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
                         xticklabels=labels, yticklabels=labels, 
                         ax=ax, annot_kws={"weight": "bold"})
-            ax.set_title(f'Confusion Matrix: {model_name}', fontsize=14, fontweight='bold')
+            ax.set_title(f'Confusion Matrix: {model_name}', fontweight='bold', pad=20)
             ax.set_xlabel('Predicted')
             ax.set_ylabel('Actual')
             plt.xticks(rotation=45, ha='right')

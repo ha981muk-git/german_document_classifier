@@ -42,7 +42,7 @@ Figure A.1 provides a high-level representation of the data and processing flow:
                           v
 +------------------------------------------------------------+
 |                 Training & Evaluation Layer                |
-| (HF Trainer, metrics, dropout, batch schedules, early stop)|
+|         (HF Trainer, metrics, early stop)                  |
 +------------------------------------------------------------+
                           |
                           v

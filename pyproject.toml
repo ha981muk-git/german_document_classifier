@@ -1,7 +1,7 @@
 [project]
 name = "german-document-classifier"
 version = "0.1.0"
-description = "German document classifier using transformers and fastapi"
+description = "German document classifier using BERT and fastapi"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

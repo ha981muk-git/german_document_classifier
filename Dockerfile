@@ -46,8 +46,6 @@ EXPOSE 8080
 
 CMD ["uvicorn", "app.api.api:app", "--host", "0.0.0.0", "--port", "8080"]
 
-#COPY ./models/bert-base-german-cased/ /srv/models/bert-base-german-cased/
-
 # docker build -t german-document-classifier .
 # docker run -p 8080:8080 german-document-classifier
 # docker run -it --rm german-document-classifier /bin/bash

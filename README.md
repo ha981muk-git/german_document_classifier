@@ -201,6 +201,10 @@ german_document_classifier/
 │   │   ├── index.html
 │   │   └── style.css
 │   │
+│   ├── statistics/
+│   │   └── result.py
+│   │   
+│   │
 │   └── notebooks/
 │       ├── 01_data_exploration.ipynb
 │       ├── 02_model_training.ipynb

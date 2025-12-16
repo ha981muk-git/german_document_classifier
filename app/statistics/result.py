@@ -5,9 +5,10 @@ Chapter 4: Results (Ergebnisse) - Unified Analysis Script
 
 Features:
 1. Parses individual experiment_report.json AND aggregate evaluation_results_*.json.
-2. Fallback to hardcoded CSV data if no models are found (for demonstration).
-3. Generates Dashboards, Scatter Plots, Bar Charts, and Confusion Matrices.
-"""
+2. Generates Dashboards, Scatter Plots, Bar Charts, and Confusion Matrices.
+3  These images are named and saved consistently in the results and 
+   copied to the appropriate directories in latex for visualization.
+4. Produces a summary text report highlighting the best model and dataset stats."""
 
 import pandas as pd
 import numpy as np

@@ -93,13 +93,26 @@ python -m app.main --prepare
 python -m app.main --train
 ```
 
-## **2.6 Alternatively Generate, Prepare and Training the BERT Models (All At Once)**
+
+## **2.6 Generating Evaluation Results**
+
+After training, you can generate comprehensive visualizations, csv files and performance summaries without re-training.
+
+```bash
+python -m app.main --results
+```
+
+
+## **2.7 Alternatively Generate, Prepare, Training the BERT Models and Evaluation Results (All At Once)**
 
 ```bash
 python -m app.main --all
 ```
 
-## **2.7 FastAPI Web Server**
+
+
+
+## **2.8 FastAPI Web Server**
 
 The FastAPI service wraps the trained `DocumentClassifier` and exposes a single `/predict` endpoint that powers both the web UI and any programmatic client. It accepts either a `text` form field (for raw strings) or a `file` upload (for PDFs, images, or DOCs) and routes the request to the right inference path. Because the server also mounts the static frontend under `/`, you only need one process to serve both the UI and the API.
 
@@ -124,7 +137,7 @@ curl -X POST http://127.0.0.1:8080/predict \
 ### Open the UI:
 👉 http://localhost:8080
 
-## **2.8 🐳 Running with Docker (Alternative)**
+## **2.9 🐳 Running with Docker (Alternative)**
 
 For easier dependency management and deployment, you can build and run the entire application using Docker. This is the recommended way to run the service in production. But you need to train and get the model first for testing the model.
 

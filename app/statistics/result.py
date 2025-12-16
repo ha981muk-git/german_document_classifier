@@ -19,19 +19,20 @@ import matplotlib.ticker as ticker
 from pathlib import Path
 from io import StringIO
 import sys
+from app.core.paths import PROJECT_ROOT, PROCESSED_DIR
+
 
 # --- Configuration ---
 warnings.filterwarnings('ignore')
 # Use modern Seaborn theme
-sns.set_theme(style="whitegrid", context="paper", font_scale=1.5)
+sns.set_theme(style="whitegrid", context="paper", font_scale=1.8)
 
 # Use a serif font that is more common in academic papers
 plt.rcParams['font.family'] = 'serif'
 # --- Constants ---
-PROJECT_ROOT = Path(".")
 MODELS_DIR = PROJECT_ROOT / "models"
-OUTPUT_DIR = PROJECT_ROOT / "results"
-DATA_PATH = PROJECT_ROOT / "app/data/processed/all_data.csv"
+RESULTS_DIR = PROJECT_ROOT / "results"
+DATA_PATH = PROCESSED_DIR / "all_data.csv"
 
 
 
@@ -41,7 +42,7 @@ def log(msg: str):
 
 def save_fig(fig, filename: str):
     """Saves a figure to the output directory with high DPI."""
-    path = OUTPUT_DIR / filename
+    path = RESULTS_DIR / filename
     fig.tight_layout()
     fig.savefig(path, dpi=300, bbox_inches='tight')
     plt.close(fig)
@@ -60,8 +61,8 @@ def find_latest_aggregate_file():
         # Legacy check
         if (MODELS_DIR / "evaluation_results.json").exists():
             candidates.append(MODELS_DIR / "evaluation_results.json")
-    if OUTPUT_DIR.exists():
-        candidates.extend(list(OUTPUT_DIR.glob("evaluation_results_*.json")))
+    if RESULTS_DIR.exists():
+        candidates.extend(list(RESULTS_DIR.glob("evaluation_results_*.json")))
     
     if not candidates: return None
     # Sort by filename (assumes timestamp in name)
@@ -190,7 +191,7 @@ def plot_speed_bar(df):
         
         plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
         for container in ax.containers:
-            ax.bar_label(container, fmt='%.0f', padding=3, fontsize=12)
+            ax.bar_label(container, fmt='%.0f', padding=3, fontsize=14)
         save_fig(fig, "fig_bar_inference_speed.png")
 
 def plot_metrics_dashboard(df):
@@ -238,7 +239,7 @@ def plot_single_comparison(df, metric, title, filename):
     # Label bars
     fmt = '%.1f' if plot_df[metric].max() > 10 else '%.4f'
     for container in ax.containers:
-        ax.bar_label(container, fmt=fmt, padding=3, fontsize=12)
+        ax.bar_label(container, fmt=fmt, padding=3, fontsize=14)
 
     # Zoom if F1/Acc
     if plot_df[metric].max() <= 1.0:
@@ -256,8 +257,8 @@ def plot_class_distribution(df_data):
     sns.barplot(data=class_counts, x='label', y='count', palette='husl', ax=ax, edgecolor='black')
     for p in ax.patches:
         ax.annotate(f'{int(p.get_height())}', (p.get_x() + p.get_width() / 2., p.get_height()),
-                    ha='center', va='bottom', xytext=(0, 5), textcoords='offset points', fontsize=12)
-    ax.set_title('Document Class Distribution', fontsize=16, fontweight='bold')
+                    ha='center', va='bottom', xytext=(0, 5), textcoords='offset points', fontsize=14)
+    ax.set_title('Document Class Distribution', fontweight='bold')
     save_fig(fig, 'fig_dataset_class_distribution.png')
 
     # 2. Box Plot (Text Length)
@@ -266,7 +267,7 @@ def plot_class_distribution(df_data):
         fig2, ax2 = plt.subplots(figsize=(14, 8))
         sns.boxplot(data=df_data, x='label', y='text_length', palette="Set2", ax=ax2)
         ax2.set_yscale('log')
-        ax2.set_title('Text Length Distribution by Class (Log Scale)', fontsize=16, fontweight='bold')
+        ax2.set_title('Text Length Distribution by Class (Log Scale)', fontweight='bold')
         ax2.set_ylabel('Text Length (Characters)')
         save_fig(fig2, 'fig_dataset_text_length_by_class.png')
 
@@ -300,9 +301,9 @@ def plot_confusion_matrix(report_path, model_name):
 
 # --- Main Execution ---
 
-def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    log(f"Starting Result Analysis. Output: {OUTPUT_DIR.resolve()}")
+def generate_results():
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    log(f"Starting Result Analysis. Output: {RESULTS_DIR.resolve()}")
 
     # 1. Dataset Analysis (Only if CSV exists)
     if DATA_PATH.exists():
@@ -326,7 +327,7 @@ def main():
     if results_df.empty:
         log("⚠️ No valid JSON data found in 'models/' directory.")
         log("🔄 Using FALLBACK CSV data for demonstration.")
-        results_df = pd.read_csv(StringIO((OUTPUT_DIR / 'table_model_performance.csv').read_text()))
+        results_df = pd.read_csv(StringIO((RESULTS_DIR / 'table_model_performance.csv').read_text()))
     else:
         log(f"✓ Loaded data for {results_df['Model'].nunique()} models from disk.")
 
@@ -336,7 +337,7 @@ def main():
 
     # 3. Clean and Save Data
     results_df = results_df.round(4)
-    results_df.to_csv(OUTPUT_DIR / 'table_model_performance.csv', index=False)
+    results_df.to_csv(RESULTS_DIR / 'table_model_performance.csv', index=False)
 
     # 4. Generate Visualizations
     log("Generating Visualizations...")
@@ -374,13 +375,10 @@ Generated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}
 ## Dataset Overview
 Total Models Evaluated: {results_df['Model'].nunique()}
             """
-            with open(OUTPUT_DIR / 'summary_report.txt', 'w') as f:
+            with open(RESULTS_DIR / 'summary_report.txt', 'w') as f:
                 f.write(summary)
             log("✓ Saved: summary_report.txt")
     except Exception as e:
         log(f"⚠️ Summary generation error: {e}")
 
     log("✓ Process Complete.")
-
-if __name__ == '__main__':
-    main()

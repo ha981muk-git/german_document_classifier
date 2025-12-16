@@ -28,6 +28,7 @@ from app.sampler.doc_generator import save_all_synthetic_as_text_files
 from app.core.evaluate import evaluate_model
 from app.core.prepare_data import prepare_datasets, combine_csv_files
 from app.core.train import train_model
+from app.statistics.result import generate_results
 
 # -----------------------------
 # Main Training Loop
@@ -44,7 +45,9 @@ def main() -> None:
     parser.add_argument("--generate", action="store_true", help="Step 1: Generate synthetic data files.")
     parser.add_argument("--prepare", action="store_true", help="Step 2: Prepare datasets from raw/synthetic files into CSVs.")
     parser.add_argument("--train", action="store_true", help="Step 3: Train models on the prepared data.")
+    parser.add_argument("--results", action="store_true", help="Step 4: Generate CSV and graphs of the models' results.")
     parser.add_argument("--all", action="store_true", help="Run the full pipeline (generate, prepare, and train).")
+    
     args = parser.parse_args()
 
     if args.generate or args.all:
@@ -53,7 +56,7 @@ def main() -> None:
             per_category=config["synthetic_data"]["per_category_v0"],
             output_dir=str(SYNTHETIC_DIR),
             overwrite=config["synthetic_data"]["overwrite"]
-        )
+        )       
         print("GENERATING SYNTHETIC DATA V1 ...")
         generator = SyntheticDocumentGenerator(per_category=config["synthetic_data"]["per_category_v1"], output_dir=str(SYNTHETIC_DIR))
         generator.generate_documents(overwrite=config["synthetic_data"]["overwrite"])
@@ -100,7 +103,11 @@ def main() -> None:
         print(f"\n💾 Saving final results to {results_path}")
         with open(results_path, "w") as f:
             json.dump(results, f, indent=4)
+    # write perser for results
 
+    if args.results or args.all:
+        print("Generate CSV and graphs of the models' results")
+        generate_results()
 
 if __name__ == "__main__":
     main()
